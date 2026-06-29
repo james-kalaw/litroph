@@ -1,0 +1,7 @@
+{
+    "traffic_multipliers": {
+        "light": 1.00,
+        "moderate": 0.85,
+        "heavy": 0.70
+    }
+}

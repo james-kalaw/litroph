@@ -1,0 +1,21 @@
+# Virtual environment
+.venv/
+
+# Sensitive credentials — never commit
+.env
+
+# Local raw data lake — too large and changes weekly
+data/raw/
+data/fuel_prices_clean.json
+*.html
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+Thumbs.db
