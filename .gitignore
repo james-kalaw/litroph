@@ -19,3 +19,7 @@ __pycache__/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Catch nested notebook data and archives
+Notebooks/data/
+Notebooks/archive/
