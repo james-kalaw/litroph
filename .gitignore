@@ -23,3 +23,7 @@ Thumbs.db
 # Catch nested notebook data and archives
 Notebooks/data/
 Notebooks/archive/
+
+# Local headless browser engine caches
+.playwright/
+
