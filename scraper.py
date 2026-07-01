@@ -2,6 +2,8 @@ import json
 import boto3
 import uuid
 import re
+import psycopg2
+from psycopg2.extras import execute_values
 from datetime import datetime
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
