@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: fuel_prices_weekly
+    description: Weekly mean market price aggregated per fuel type.
+    columns:
+      - name: week_date
+        tests:
+          - not_null
+      - name: fuel_display_name
+        tests:
+          - not_null
+      - name: price_avg
+        tests:
+          - not_null
+      - name: brand_count
+        tests:
+          - not_null
+
+  - name: brand_prices_weekly
+    description: Individual brand price per fuel type per week, cheapest first.
+    columns:
+      - name: week_date
+        tests:
+          - not_null
+      - name: brand
+        tests:
+          - not_null
+      - name: fuel_type_slug
+        tests:
+          - not_null
+      - name: price_php
+        tests:
+          - not_null

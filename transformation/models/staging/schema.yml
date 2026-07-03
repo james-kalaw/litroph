@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: stg_fuel_prices
+    description: >
+      Cleaned and type-cast staging layer sourced from
+      raw_ingestion.fact_brand_prices. Strips peso symbols,
+      casts prices to NUMERIC(8,2), joins the brand dimension.
+
+    columns:
+      - name: ingestion_run_id
+        description: UUID identifying the Lambda execution run
+        tests:
+          - not_null
+
+      - name: week_date
+        description: ISO 8601 date of the fuel price week (e.g. 2026-06-23)
+        tests:
+          - not_null
+
+      - name: brand
+        description: Gas station brand name from dim_brands
+        tests:
+          - not_null
+
+      - name: fuel_type_slug
+        description: Machine-readable fuel type slug
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - diesel
+                  - prem-diesel
+                  - unleaded-91
+                  - prem-95
+                  - prem-97
+                  - e-gas
+                  - kerosene
+
+      - name: price_php
+        description: Cleaned numeric pump price in Philippine Peso per liter
+        tests:
+          - not_null

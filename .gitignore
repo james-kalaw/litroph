@@ -27,3 +27,5 @@ Notebooks/archive/
 # Local headless browser engine caches
 .playwright/
 
+transformation/target/
+transformation/dbt_packages/

@@ -1,0 +1,13 @@
+litroph:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: litroph-data-warehouse.colwaceymp8h.us-east-1.rds.amazonaws.com
+      port: 5432
+      user: litroph_admin
+      password: jameskalaw0915
+      dbname: litroph_db
+      schema: analytical_core
+      threads: 1
+      connect_timeout: 30
