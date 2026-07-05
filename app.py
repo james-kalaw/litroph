@@ -31,7 +31,7 @@ def get_base64_image(path):
 logo_base64 = get_base64_image(logo_path)
 
 # ============================================================
-# INJECT UNIFIED HEADER & RESPONSIVE LAYOUT CSS
+# INJECT UNIFIED HEADER & PORTRAIT MAP LAYOUT CSS
 # ============================================================
 st.markdown(f"""
 <style>
@@ -40,7 +40,7 @@ st.markdown(f"""
     padding-top: 2rem !important;
 }}
 
-/* FLEXBOX HEADER LAYOUT (Aligns logo and titles side-by-side) */
+/* FLEXBOX HEADER LAYOUT */
 .litroph-header-container {{
     display: flex;
     align-items: center;
@@ -77,10 +77,10 @@ st.markdown(f"""
     font-weight: 400;
 }}
 
-/* DESKTOP MAP & PLACEHOLDER MEASUREMENTS */
+/* PORTRAIT MAP & PLACEHOLDER MEASUREMENTS (Desktop) */
 .map-responsive-box {{
     width: 100%;
-    height: 400px;
+    height: 500px; /* Increased to make it a taller frame */
     background: #111827;
     border: 1px solid #1E2A40;
     border-radius: 8px;
@@ -91,7 +91,14 @@ st.markdown(f"""
     gap: 0.75rem;
 }}
 
-/* MOBILE RESPONSIVE ADAPTATION */
+/* Target the live TomTom iframe container wrapper */
+div[data-testid="stCustomComponentV1"] iframe {{
+    width: 100% !important;
+    height: 500px !important;
+    border-radius: 8px;
+}}
+
+/* MOBILE RESPONSIVE ADAPTATION (Strict Portrait Tuning) */
 @media (max-width: 768px) {{
     .litroph-header-container {{
         gap: 12px;
@@ -111,15 +118,15 @@ st.markdown(f"""
         margin: 2px 0 0 0;
     }}
     
-    /* Force live TomTom map iframe to render as a landscape rectangle */
+    /* Force live TomTom map iframe into a distinct portrait shape on mobile */
     div[data-testid="stCustomComponentV1"] iframe {{
         width: 100% !important;
-        height: 240px !important;
+        height: 480px !important; /* Taller height on narrow width creates portrait view */
     }}
     
-    /* Keep placeholder box matching the live landscape map layout exactly */
+    /* Ensure placeholder box matches the mobile portrait layout exactly */
     .map-responsive-box {{
-        height: 240px !important;
+        height: 480px !important;
     }}
 }}
 </style>
@@ -129,7 +136,7 @@ st.markdown(f"""
         <img src="data:image/png;base64,{logo_base64}">
     </div>
     <div class="litroph-header-text">
-        <div class="litroph-header-title">LITROPH · FUEL ROUTE OPTIMIZER</div>
+        <div class="litroph-header-title">LITROPH  ·  FUEL ROUTE OPTIMIZER</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -774,7 +781,7 @@ with col_right:
         # Renders the live interactive route layout map (Dynamic responsive override handled via CSS)
         components.html(
             st.session_state.map_html,
-            height=400
+           height=500
         )
         
         st.markdown("<div class='map-output-spacing'></div>", unsafe_allow_html=True)
