@@ -11,25 +11,32 @@ import streamlit.components.v1 as components
 from datetime import datetime
 from dotenv import load_dotenv
 import base64
+from pathlib import Path
+import streamlit.components.v1 as components
 
 
 # ============================================================
-# CONVERT LOGO TO BASE64 (Bypasses folder path errors)
+# CONVERT LOGO TO BASE64 (Guaranteed Path Resolution)
 # ============================================================
-def get_base64_image(image_path):
-    if os.path.exists(image_path):
-        with open(image_path, "rb") as img_file:
+# Dynamically resolves the exact folder app.py is sitting in
+current_dir = Path(__file__).parent
+logo_path = current_dir / "litroph_logo.png"
+
+def get_base64_image(path):
+    try:
+        with open(path, "rb") as img_file:
             return base64.b64encode(img_file.read()).decode()
-    return ""
+    except Exception:
+        return ""
 
-logo_base64 = get_base64_image("litroph_logo.png")
+logo_base64 = get_base64_image(logo_path)
 
 # ============================================================
 # INJECT RESPONSIVE EMBEDDED CSS
 # ============================================================
 st.markdown(f"""
 <style>
-/* 1. DESKTOP VIEW: Keeps logo safely inside its column container */
+/* DESKTOP VIEW */
 .logo-container img {{
     max-width: 180px;
     height: auto;
@@ -37,24 +44,19 @@ st.markdown(f"""
     margin-top: 45px;
 }}
 
-/* 2. MOBILE VIEW BREAKOUT (Screens under 768px wide) */
+/* MOBILE VIEW BREAKOUT */
 @media (max-width: 768px) {{
     .logo-container img {{
-        position: absolute !important;
-        top: 12px !important;
-        right: 15px !important;
-        max-width: 95px !important; /* Made slightly smaller for mobile balance */
+        position: fixed !important;
+        top: 15px !important;
+        left: 60px !important; /* Forces it to the top-left, clearing the hamburger menu */
+        max-width: 80px !important; /* Smaller mobile scale */
         margin-top: 0px !important;
-        z-index: 99999 !important;
+        z-index: 999999 !important;
     }}
-    .hero-title {{
-        padding-right: 85px; /* Prevents text from slipping behind floating logo */
+    .hero {{
+        padding-top: 25px; /* Pushes the title text down so the logo doesn't cover it */
     }}
-}}
-
-/* 3. CLEAN SEPARATOR BETWEEN COMPONENTS */
-.map-output-spacing {{
-    margin-bottom: 12px;
 }}
 </style>
 """, unsafe_allow_html=True)
@@ -606,6 +608,14 @@ with col_logo:
 # ============================================================
 # SECTION 1 — ROUTE CALCULATOR
 # ============================================================
+
+# 1. INITIALIZE MEMORY STATE TO PREVENT MAP COLLAPSE
+if "map_calculated" not in st.session_state:
+    st.session_state.map_calculated = False
+    st.session_state.routes = []
+    st.session_state.map_html = ""
+    st.session_state.price_label = ""
+
 st.markdown("""
 <div class="section-header">
   <span class="section-icon">🗺️</span>
@@ -649,6 +659,10 @@ with col_left:
     calculate_btn = st.button("⚡ Calculate Cheapest Route")
 
 with col_right:
+    # 2. MASTER HEIGHT CONTROLLER
+    MASTER_MAP_HEIGHT = 400
+
+    # 3. PROCESSING ENGINE (Runs only when button is clicked)
     if calculate_btn:
         if not origin_input or not dest_input:
             st.warning("Please enter both origin and destination.")
@@ -686,54 +700,64 @@ with col_right:
 
                             routes.sort(key=lambda x: x["cost"])
 
-                            # ============================================================
-                            # SHOW MAP (Integrated Fix)
-                            # ============================================================
                             route_map = build_route_map(
                                 routes, origin_lat, origin_lon,
                                 dest_lat, dest_lon,
                                 origin_input, dest_input
                             )
                             
-                            # Native height budget matched exactly to the placeholder
-                            components.html(
-                                route_map._repr_html_(),
-                                height=400
-                            )
-                            
-                            # Safe structural spacer to push subsequent elements cleanly downward
-                            st.markdown("<div class='map-output-spacing'></div>", unsafe_allow_html=True)
-                            
-                            # ============================================================
-                            # SHOW ROUTE RESULT CARDS
-                            # ============================================================
-                            st.markdown(f"<div style='font-size:0.72rem;color:#475569;font-family:JetBrains Mono,monospace;margin:0.75rem 0 0.5rem 0;letter-spacing:0.08em;'>FUEL · {price_label.upper()}</div>", unsafe_allow_html=True)
+                            # SAVE TO MEMORY: Lock the generated output in session state
+                            st.session_state.map_calculated = True
+                            st.session_state.routes = routes
+                            st.session_state.map_html = route_map._repr_html_()
+                            st.session_state.price_label = price_label
 
-                            rank_colors = ["#10B981", "#F5A623", "#EF4444"]
-                            rank_labels = ["RECOMMENDED", "OPTION 2", "OPTION 3"]
-                            rank_card_class = ["route-recommended", "route-option", "route-option"]
+    # ============================================================
+    # 4. RENDERING ENGINE: Reads from memory, immune to reruns
+    # ============================================================
+    if st.session_state.map_calculated:
+        
+        # Draw the live interactive map
+        components.html(
+            st.session_state.map_html,
+            height=MASTER_MAP_HEIGHT
+        )
+        
+        # Safe structural spacer to push subsequent elements cleanly downward
+        st.markdown("<div class='map-output-spacing'></div>", unsafe_allow_html=True)
+        
+        # Pull data from memory to render the cards
+        routes = st.session_state.routes
+        price_label = st.session_state.price_label
+        
+        # SHOW ROUTE RESULT CARDS
+        st.markdown(f"<div style='font-size:0.72rem;color:#475569;font-family:JetBrains Mono,monospace;margin:0.75rem 0 0.5rem 0;letter-spacing:0.08em;'>FUEL · {price_label.upper()}</div>", unsafe_allow_html=True)
 
-                            result_cols = st.columns(len(routes[:3]))
-                            for i, (col, route) in enumerate(zip(result_cols, routes[:3])):
-                                with col:
-                                    savings = routes[0]["cost"] - route["cost"] if i > 0 else None
-                                    traffic_pct = int((1 - route["traffic_multiplier"]) * 100)
-                                    st.markdown(f"""
-                                    <div class="{rank_card_class[i]}">
-                                      <div class="route-label" style="color:{rank_colors[i]};">{rank_labels[i]}</div>
-                                      <div class="route-cost" style="color:{rank_colors[i]};">₱{route['cost']:.2f}</div>
-                                      <div class="route-meta">
-                                        {route['distance_km']:.1f} km &nbsp;·&nbsp;
-                                        {route['live_time_min']:.0f} min
-                                        {f'&nbsp;·&nbsp;<span style="color:#EF4444;">+{traffic_pct}% traffic</span>' if traffic_pct > 5 else ''}
-                                      </div>
-                                      {'<div class="route-meta" style="color:#10B981;margin-top:0.4rem;">Saves ₱' + f"{abs(savings):.2f}" + ' vs Option 1</div>' if savings is not None and savings < 0 else ''}
-                                    </div>
-                                    """, unsafe_allow_html=True)
+        rank_colors = ["#10B981", "#F5A623", "#EF4444"]
+        rank_labels = ["RECOMMENDED", "OPTION 2", "OPTION 3"]
+        rank_card_class = ["route-recommended", "route-option", "route-option"]
+
+        result_cols = st.columns(len(routes[:3]))
+        for i, (col, route) in enumerate(zip(result_cols, routes[:3])):
+            with col:
+                savings = routes[0]["cost"] - route["cost"] if i > 0 else None
+                traffic_pct = int((1 - route["traffic_multiplier"]) * 100)
+                st.markdown(f"""
+                <div class="{rank_card_class[i]}">
+                  <div class="route-label" style="color:{rank_colors[i]};">{rank_labels[i]}</div>
+                  <div class="route-cost" style="color:{rank_colors[i]};">₱{route['cost']:.2f}</div>
+                  <div class="route-meta">
+                    {route['distance_km']:.1f} km &nbsp;·&nbsp;
+                    {route['live_time_min']:.0f} min
+                    {f'&nbsp;·&nbsp;<span style="color:#EF4444;">+{traffic_pct}% traffic</span>' if traffic_pct > 5 else ''}
+                  </div>
+                  {'<div class="route-meta" style="color:#10B981;margin-top:0.4rem;">Saves ₱' + f"{abs(savings):.2f}" + ' vs Option 1</div>' if savings is not None and savings < 0 else ''}
+                </div>
+                """, unsafe_allow_html=True)
     else:
         # PLACEHOLDER STATE: Height set explicitly to 400 to match the iframe exactly
-        st.markdown("""
-        <div style="height:400px; background:#111827; border:1px solid #1E2A40; border-radius:8px;
+        st.markdown(f"""
+        <div style="height:{MASTER_MAP_HEIGHT}px; background:#111827; border:1px solid #1E2A40; border-radius:8px;
                      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.75rem;">
           <div style="font-size:2.5rem;">🗺️</div>
           <div style="color:#334155; font-size:0.85rem; font-family:'JetBrains Mono',monospace; letter-spacing:0.05em;">
