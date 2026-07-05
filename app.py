@@ -15,7 +15,6 @@ from pathlib import Path
 import streamlit as st
 import streamlit.components.v1 as components
 
-
 # ============================================================
 # PATH RESOLUTION & BASE64 CONVERSION
 # ============================================================
@@ -32,22 +31,23 @@ def get_base64_image(path):
 logo_base64 = get_base64_image(logo_path)
 
 # ============================================================
-# INJECT RESPONSIVE LAYOUT CSS (Single Logo Pinned Top-Right)
+# INJECT RESPONSIVE LAYOUT CSS (Single Logo Pinned Top-Left)
 # ============================================================
 st.markdown(f"""
 <style>
-/* Establish absolute boundary on the main content container */
-[data-testid="stAppViewContainer"] {{
+/* Establish absolute boundary on the main content area */
+[data-testid="stMainBlockContainer"] {{
     position: relative;
+    padding-top: 6rem !important; /* Creates clear breathing room for the top-left logo */
 }}
 
-/* STICK TO TOP RIGHT CORNER ALWAYS (Desktop & Mobile Viewport) */
+/* STICK TO TOP LEFT CORNER (Desktop & Mobile Viewport) */
 .logo-container {{
     position: absolute;
-    top: 55px; 
-    right: 30px;
+    top: 20px; 
+    left: 45px;
     z-index: 99999;
-    pointer-events: none; /* Allows interacting with elements beneath the transparency wrap */
+    pointer-events: none; /* Allows clicking through any transparent margins */
 }}
 .logo-container img {{
     width: 140px;
@@ -71,13 +71,13 @@ st.markdown(f"""
 
 /* MOBILE RESPONSIVE ADAPTATION */
 @media (max-width: 768px) {{
-    /* Keep single logo pinned top-right, scaling down cleanly */
+    /* Keep single logo pinned top-left, scaling down cleanly on mobile mobile viewports */
     .logo-container {{
-        top: 25px !important;
-        right: 15px !important;
+        top: 15px !important;
+        left: 20px !important;
     }}
     .logo-container img {{
-        width: 95px !important;
+        width: 100px !important;
     }}
     
     /* Force live TomTom map iframe to render as a clean landscape rectangle */
