@@ -500,6 +500,8 @@ with col_hero:
     </div>
     """, unsafe_allow_html=True)
 with col_logo:
+    # This injects a 45-pixel invisible space to push the logo downwards
+    st.markdown("<div style='margin-top: 45px;'></div>", unsafe_allow_html=True)
     st.image("litroph_logo.png", width=180)
 
 
