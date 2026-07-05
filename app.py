@@ -10,6 +10,7 @@ import polyline
 import streamlit.components.v1 as components
 from datetime import datetime
 from dotenv import load_dotenv
+from streamlit_folium import st_folium
 
 load_dotenv()
 MAP_HEIGHT = 500
@@ -381,7 +382,9 @@ def build_route_map(routes_with_costs, origin_lat, origin_lon, dest_lat, dest_lo
     route_map = folium.Map(
         location=[center_lat, center_lon],
         tiles="CartoDB dark_matter",
-        zoom_start=13
+        zoom_start=13,
+        width="100%",
+        height=550
     )
 
     colors = ["#10B981", "#F5A623", "#EF4444"]
@@ -634,11 +637,12 @@ with col_right:
 
                             MAP_HEIGHT = 550
 
-                            components.html(
-                                route_map._repr_html_(),
-                                height=MAP_HEIGHT,
-                                scrolling=False
-                            )
+                            st_folium(
+                                route_map,
+                                width="100%",
+                                height=550
+                                srolling=False
+                                )
 
                             # Show route result cards
                             st.markdown(f"<div style='font-size:0.72rem;color:#475569;font-family:JetBrains Mono,monospace;margin:0.75rem 0 0.5rem 0;letter-spacing:0.08em;'>FUEL · {price_label.upper()}</div>", unsafe_allow_html=True)
