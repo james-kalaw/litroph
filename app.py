@@ -640,7 +640,7 @@ with col_right:
                             st_folium(
                                 route_map,
                                 width="100%",
-                                height=550
+                                height= MAP_HEIGHT,
                                 srolling=False
                                 )
 
