@@ -641,7 +641,7 @@ with col_right:
                                 route_map,
                                 width="100%",
                                 height= MAP_HEIGHT,
-                                srolling=False
+                                scrolling=False
                                 )
 
                             # Show route result cards
