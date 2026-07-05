@@ -17,8 +17,8 @@ load_dotenv()
 # PAGE CONFIG — must be first Streamlit call
 # ============================================================
 st.set_page_config(
-    page_title="LitroPH — Fuel Route Optimizer",
-    page_icon="⛽",
+    page_title="LitroPH — Fuel Efficiency Route Optimizer",
+    page_icon="litroph_icon.png",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -240,8 +240,15 @@ st.markdown("""
     margin: 2rem 0;
   }
 
-  /* ── Footer ── */
-  .app-footer {
+  /* ── Map responsive height ── */
+  iframe {
+    min-height: 280px;
+  }
+  @media (min-width: 768px) {
+    iframe {
+      min-height: 380px;
+    }
+  }
     margin-top: 4rem;
     padding-top: 1.5rem;
     border-top: 1px solid #1E2A40;
@@ -454,7 +461,7 @@ except Exception as e:
 # TICKER BAR
 # ============================================================
 if data_ok and not df_prices.empty:
-    fuel_types_for_ticker = ["Diesel", "Unleaded 91", "Prem 95", "Kerosene"]
+    fuel_types_for_ticker = sorted(df_prices["fuel_display_name"].unique().tolist())
     ticker_html = '<div class="ticker-bar">'
     ticker_html += f'<div class="ticker-item"><span class="ticker-label">WEEK</span><span class="ticker-value">{latest_week}</span></div>'
 
@@ -480,16 +487,20 @@ if data_ok and not df_prices.empty:
 # ============================================================
 # HERO
 # ============================================================
-st.markdown("""
-<div class="hero">
-  <div class="hero-eyebrow">⛽ LITROPH · FUEL ROUTE OPTIMIZER</div>
-  <div class="hero-title">Find the cheapest route.<br><span>Save every liter.</span></div>
-  <div class="hero-subtitle">
-    Live Philippine pump prices meet real-time Metro Manila traffic.
-    Enter your trip and see which route costs you the least in peso — down to the centavo.
-  </div>
-</div>
-""", unsafe_allow_html=True)
+col_hero, col_logo = st.columns([3, 1])
+with col_hero:
+    st.markdown("""
+    <div class="hero">
+      <div class="hero-eyebrow">⛽ LITROPH · FUEL ROUTE OPTIMIZER</div>
+      <div class="hero-title">Find the cheapest route.<br><span>Save every liter.</span></div>
+      <div class="hero-subtitle">
+        Live Philippine pump prices meet real-time Metro Manila traffic.
+        Enter your trip and see which route costs you the least in peso — down to the centavo.
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+with col_logo:
+    st.image("litroph_logo.png", width=180)
 
 
 # ============================================================
@@ -518,7 +529,6 @@ with col_left:
             "Premium 97": "prem-97",
             "Prem Diesel": "prem-diesel",
             "Kerosene": "kerosene",
-            "E-gas": "e-gas"
         }
         fuel_label = st.selectbox("Fuel type", list(fuel_options.keys()))
         fuel_slug = fuel_options[fuel_label]
@@ -584,7 +594,7 @@ with col_right:
                             )
                             components.html(
                                 route_map._repr_html_(),
-                                height=380
+                                height=320
                             )
 
                             # Show route result cards
@@ -755,6 +765,8 @@ if data_ok and not df_history.empty:
         )
         fig1.update_traces(hovertemplate="₱%{y:.2f}")
         st.plotly_chart(fig1, use_container_width=True, config={"displayModeBar": False})
+
+
 
 
 # ============================================================

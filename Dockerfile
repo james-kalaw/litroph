@@ -2,16 +2,21 @@
 FROM public.ecr.aws/lambda/python:3.12
 
 # Install system dependencies required by Chromium/Playwright
-RUN dnf install -y nss atk cups-libs libXcomposite libXdamage libXrandr libgbm pango alsa-lib \
-    libxkbcommon atk libdrm mesa-libgbm
+RUN dnf install -y nss atk cups-libs libXcomposite libXcursor libXdamage \
+    libXext libXi libXtst libXrandr libXScrnSaver pango alsa-lib \
+    libxkbcommon libdrm mesa-libgbm gtk3 at-spi2-atk at-spi2-core \
+    xorg-x11-server-Xvfb
+
 
 # Install Python requirements
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 RUN pip install boto3
 
-# Install Playwright and the Chromium browser engine
+# Install Playwright Chromium to a fixed path accessible by any user
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 RUN playwright install chromium
+RUN chmod -R 777 /ms-playwright
 
 # Copy your script into the container
 COPY scraper.py ${LAMBDA_TASK_ROOT}

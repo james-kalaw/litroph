@@ -1,3 +1,4 @@
+import os
 import json
 import boto3
 import uuid
@@ -35,11 +36,6 @@ def lambda_handler(event, context):
     with sync_playwright() as p:
         browser = p.chromium.launch(
             headless=True,
-            # CHANGE 1: channel="msedge" removed — Edge is not installed in this
-            # container, only Chromium (per Dockerfile: playwright install chromium)
-            #
-            # CHANGE 2: --disable-web-security replaced with --disable-dev-shm-usage
-            # (this was already flagged as FINDING 5 in the notebook — applying it now)
             args=[
                 '--no-sandbox',
                 '--disable-dev-shm-usage',
@@ -50,9 +46,6 @@ def lambda_handler(event, context):
         page = browser.new_page()
 
         try:
-            # CHANGE 3: ThreadPoolExecutor wrapper removed — that existed only to
-            # solve a Windows + Jupyter event loop conflict that does not exist
-            # in this plain Lambda Python process. sync_playwright() runs directly.
             print("Navigating to target domain...")
             page.goto("https://gaswatchph.com", wait_until="domcontentloaded", timeout=60000)
 
@@ -145,7 +138,6 @@ def lambda_handler(event, context):
             print(f"CRITICAL ERROR during scraping execution: {str(e)}")
             raise e
         finally:
-            # Guard against double-close if browser.close() above already ran
             try:
                 browser.close()
             except Exception:
@@ -168,8 +160,84 @@ def lambda_handler(event, context):
         Body=json.dumps(extracted_data, ensure_ascii=False),
         ContentType='application/json'
     )
+    print(f"Successfully archived raw payload to S3: {file_key}")
+
+    
+    # 8. RELATIONAL RDS DATA WAREHOUSE INGESTION BRIDGE (PHASE 3)
+    try:
+        print("Connecting to RDS PostgreSQL instance...")
+        conn = psycopg2.connect(
+            host=os.environ['DB_HOST'],
+            database=os.environ['DB_NAME'],
+            user=os.environ['DB_USER'],
+            password=os.environ['DB_PASSWORD'],
+            port=os.environ['DB_PORT']
+        )
+        print("Connected to RDS. Beginning transactional database ingestion loop...")
+        
+        with conn.cursor() as cur:
+            # Step A: Batch UPSERT unique brands in ONE query
+            unique_brands = list({item['brand'] for item in extracted_data})
+            execute_values(cur,
+                """
+                INSERT INTO raw_ingestion.dim_brands (brand_name)
+                VALUES %s
+                ON CONFLICT (brand_name) DO NOTHING;
+                """,
+                [(b,) for b in unique_brands]
+            )
+            
+            # Step B: Fetch ALL brand_id mappings in ONE query into a lookup dictionary
+            cur.execute(
+                "SELECT brand_name, brand_id FROM raw_ingestion.dim_brands WHERE brand_name = ANY(%s);",
+                (unique_brands,)
+            )
+            brand_map = {row[0]: row[1] for row in cur.fetchall()}
+            
+            # Step C: Batch INSERT all transactional fact rows in ONE execute_values call
+            execute_values(cur,
+                """
+                INSERT INTO raw_ingestion.fact_brand_prices (
+                    ingestion_run_id, brand_id, fuel_display_name, fuel_type_slug,
+                    current_price, price_unit, price_trend, weekly_change,
+                    week_date, extraction_timestamp, source
+                )
+                VALUES %s
+                ON CONFLICT ON CONSTRAINT uq_price_per_week DO NOTHING;
+                """,
+                [
+                    (
+                        item['ingestion_run_id'],
+                        brand_map[item['brand']],
+                        item['fuel_display_name'],
+                        item['fuel_type_slug'],
+                        item['current_price'],
+                        item['price_unit'],
+                        item['price_trend'],
+                        item['weekly_change'],
+                        item['week_date'],
+                        item['extraction_timestamp'],
+                        item['source']
+                    )
+                    for item in extracted_data
+                ]
+            )
+            
+            # Commit the transactions only if all batch steps cleared successfully
+            conn.commit()
+            print(f"Relational ingestion complete. Loaded {len(extracted_data)} records into RDS.")
+            
+    except Exception as db_err:
+        if 'conn' in locals() and conn:
+            conn.rollback()
+        print(f"Database ingestion crashed. Rolling back transactions. Error: {str(db_err)}")
+        raise db_err
+    finally:
+        if 'conn' in locals() and conn:
+            conn.close()
+            print("Database connection cleanly closed.")
 
     return {
         'statusCode': 200,
-        'body': f"SUCCESS: Scraped and uploaded {len(extracted_data)} records to {file_key}"
+        'body': f"SUCCESS: Scraped, archived to S3, and cleanly batched {len(extracted_data)} records into RDS PostgreSQL warehouse."
     }
