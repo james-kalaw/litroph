@@ -31,28 +31,50 @@ def get_base64_image(path):
 logo_base64 = get_base64_image(logo_path)
 
 # ============================================================
-# INJECT RESPONSIVE LAYOUT CSS (Strict Top-Left Corner Only)
+# INJECT UNIFIED HEADER & RESPONSIVE LAYOUT CSS
 # ============================================================
 st.markdown(f"""
 <style>
-/* Establish absolute alignment boundary on the main block */
+/* Reset container spacing to standard flow */
 [data-testid="stMainBlockContainer"] {{
-    position: relative;
-    padding-top: 5.5rem !important; /* Pushes content down so logo never overlaps title */
+    padding-top: 2rem !important;
 }}
 
-/* FIXED TOP-LEFT DESIGNATION */
-.litroph-unique-left-logo {{
-    position: absolute;
-    top: 15px; 
-    left: 45px;
-    z-index: 99999;
-    pointer-events: none;
+/* FLEXBOX HEADER LAYOUT (Aligns logo and titles side-by-side) */
+.litroph-header-container {{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 1.5rem;
+    width: 100%;
 }}
-.litroph-unique-left-logo img {{
-    width: 130px;
+
+.litroph-header-logo img {{
+    width: 120px;
     height: auto;
     display: block;
+}}
+
+.litroph-header-text {{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}}
+
+.litroph-header-title {{
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    margin: 0;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+}}
+
+.litroph-header-subtitle {{
+    font-size: 0.95rem;
+    color: #94A3B8;
+    margin: 4px 0 0 0;
+    font-weight: 400;
 }}
 
 /* DESKTOP MAP & PLACEHOLDER MEASUREMENTS */
@@ -71,15 +93,25 @@ st.markdown(f"""
 
 /* MOBILE RESPONSIVE ADAPTATION */
 @media (max-width: 768px) {{
-    .litroph-unique-left-logo {{
-        top: 15px !important;
-        left: 15px !important;
-    }}
-    .litroph-unique-left-logo img {{
-        width: 90px !important;
+    .litroph-header-container {{
+        gap: 12px;
+        margin-bottom: 1rem;
     }}
     
-    /* Force live TomTom map iframe to remain a landscape rectangle */
+    .litroph-header-logo img {{
+        width: 75px;
+    }}
+    
+    .litroph-header-title {{
+        font-size: 1.15rem;
+    }}
+    
+    .litroph-header-subtitle {{
+        font-size: 0.75rem;
+        margin: 2px 0 0 0;
+    }}
+    
+    /* Force live TomTom map iframe to render as a landscape rectangle */
     div[data-testid="stCustomComponentV1"] iframe {{
         width: 100% !important;
         height: 240px !important;
@@ -92,8 +124,13 @@ st.markdown(f"""
 }}
 </style>
 
-<div class="litroph-unique-left-logo">
-    <img src="data:image/png;base64,{logo_base64}">
+<div class="litroph-header-container">
+    <div class="litroph-header-logo">
+        <img src="data:image/png;base64,{logo_base64}">
+    </div>
+    <div class="litroph-header-text">
+        <div class="litroph-header-title">LITROPH · FUEL ROUTE OPTIMIZER</div>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -622,7 +659,6 @@ col_hero, col_logo = st.columns([3, 1])
 with col_hero:
     st.markdown("""
     <div class="hero">
-      <div class="hero-eyebrow">⛽ LITROPH · FUEL ROUTE OPTIMIZER</div>
       <div class="hero-title">Find the cheapest route.<br><span>Save every liter.</span></div>
       <div class="hero-subtitle">
         Live Philippine pump prices meet real-time Metro Manila traffic.
