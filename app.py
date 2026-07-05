@@ -12,13 +12,13 @@ from datetime import datetime
 from dotenv import load_dotenv
 import base64
 from pathlib import Path
+import streamlit as st
 import streamlit.components.v1 as components
 
 
 # ============================================================
-# CONVERT LOGO TO BASE64 (Guaranteed Path Resolution)
+# PATH RESOLUTION & BASE64 CONVERSION
 # ============================================================
-# Dynamically resolves the exact folder app.py is sitting in
 current_dir = Path(__file__).parent
 logo_path = current_dir / "litroph_logo.png"
 
@@ -32,33 +32,71 @@ def get_base64_image(path):
 logo_base64 = get_base64_image(logo_path)
 
 # ============================================================
-# INJECT RESPONSIVE EMBEDDED CSS
+# INJECT RESPONSIVE LAYOUT CSS
 # ============================================================
 st.markdown(f"""
 <style>
-/* DESKTOP VIEW */
-.logo-container img {{
-    max-width: 180px;
-    height: auto;
-    display: block;
-    margin-top: 45px;
+/* App container positioning context */
+[data-testid="stAppViewContainer"] {{
+    position: relative;
 }}
 
-/* MOBILE VIEW BREAKOUT */
+/* LOGO POSITIONING (Top-Right, Scrolls Naturally) */
+.logo-container {{
+    position: absolute;
+    top: 60px; /* Aligns with the upper margin of the main page content */
+    right: 20px;
+    z-index: 99;
+}}
+.logo-container img {{
+    max-width: 140px;
+    height: auto;
+    display: block;
+}}
+
+/* DESKTOP MAP & PLACEHOLDER MEASUREMENTS */
+.map-responsive-box {{
+    height: 400px;
+    background: #111827;
+    border: 1px solid #1E2A40;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}}
+
+/* MOBILE BREAKOUT ADJUSTMENTS */
 @media (max-width: 768px) {{
-    .logo-container img {{
-        position: fixed !important;
-        top: 15px !important;
-        left: 60px !important; /* Forces it to the top-left, clearing the hamburger menu */
-        max-width: 80px !important; /* Smaller mobile scale */
-        margin-top: 0px !important;
-        z-index: 999999 !important;
+    /* Shift logo above the title context on mobile views */
+    .logo-container {{
+        position: relative !important;
+        top: 0 !important;
+        right: 0 !important;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: flex-start;
     }}
-    .hero {{
-        padding-top: 25px; /* Pushes the title text down so the logo doesn't cover it */
+    .logo-container img {{
+        max-width: 100px !important;
+    }}
+    
+    /* Force live TomTom map iframe to be a clean landscape rectangle */
+    div[data-testid="stCustomComponentV1"] iframe {{
+        height: 220px !important;
+    }}
+    
+    /* Force placeholder box to match the live landscape map height exactly */
+    .map-responsive-box {{
+        height: 220px !important;
     }}
 }}
 </style>
+
+<div class="logo-container">
+    <img src="data:image/png;base64,{logo_base64}">
+</div>
 """, unsafe_allow_html=True)
 
 load_dotenv()
@@ -609,7 +647,7 @@ with col_logo:
 # SECTION 1 — ROUTE CALCULATOR
 # ============================================================
 
-# 1. INITIALIZE MEMORY STATE TO PREVENT MAP COLLAPSE
+# Initialize session state tracking for map outputs
 if "map_calculated" not in st.session_state:
     st.session_state.map_calculated = False
     st.session_state.routes = []
@@ -659,10 +697,7 @@ with col_left:
     calculate_btn = st.button("⚡ Calculate Cheapest Route")
 
 with col_right:
-    # 2. MASTER HEIGHT CONTROLLER
-    MASTER_MAP_HEIGHT = 400
-
-    # 3. PROCESSING ENGINE (Runs only when button is clicked)
+    # Processing Engine (Executes core logic when triggered)
     if calculate_btn:
         if not origin_input or not dest_input:
             st.warning("Please enter both origin and destination.")
@@ -674,7 +709,6 @@ with col_right:
                 if not origin_lat or not dest_lat:
                     st.error("Could not geocode one or both locations. Try a more specific address.")
                 else:
-                    # Get fuel price
                     if brand_choice == "National average":
                         fuel_price = get_average_price(df_prices, fuel_slug)
                         price_label = f"National avg · ₱{fuel_price:.2f}/L"
@@ -690,7 +724,6 @@ with col_right:
                         if not routes:
                             st.error("Could not fetch routes. Check TomTom API key.")
                         else:
-                            # Compute cost per route
                             for r in routes:
                                 cost, mult = calculate_cost(
                                     r["distance_km"], km_per_liter,
@@ -706,31 +739,24 @@ with col_right:
                                 origin_input, dest_input
                             )
                             
-                            # SAVE TO MEMORY: Lock the generated output in session state
                             st.session_state.map_calculated = True
                             st.session_state.routes = routes
                             st.session_state.map_html = route_map._repr_html_()
                             st.session_state.price_label = price_label
 
-    # ============================================================
-    # 4. RENDERING ENGINE: Reads from memory, immune to reruns
-    # ============================================================
+    # Rendering Engine (Reads data cleanly from memory layout context)
     if st.session_state.map_calculated:
-        
-        # Draw the live interactive map
+        # Renders the live interactive route layout map (Dynamic responsive override handled via CSS)
         components.html(
             st.session_state.map_html,
-            height=MASTER_MAP_HEIGHT
+            height=400
         )
         
-        # Safe structural spacer to push subsequent elements cleanly downward
         st.markdown("<div class='map-output-spacing'></div>", unsafe_allow_html=True)
         
-        # Pull data from memory to render the cards
         routes = st.session_state.routes
         price_label = st.session_state.price_label
         
-        # SHOW ROUTE RESULT CARDS
         st.markdown(f"<div style='font-size:0.72rem;color:#475569;font-family:JetBrains Mono,monospace;margin:0.75rem 0 0.5rem 0;letter-spacing:0.08em;'>FUEL · {price_label.upper()}</div>", unsafe_allow_html=True)
 
         rank_colors = ["#10B981", "#F5A623", "#EF4444"]
@@ -755,17 +781,15 @@ with col_right:
                 </div>
                 """, unsafe_allow_html=True)
     else:
-        # PLACEHOLDER STATE: Height set explicitly to 400 to match the iframe exactly
-        st.markdown(f"""
-        <div style="height:{MASTER_MAP_HEIGHT}px; background:#111827; border:1px solid #1E2A40; border-radius:8px;
-                     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.75rem;">
+        # Uniform placeholder layout configuration
+        st.markdown("""
+        <div class="map-responsive-box">
           <div style="font-size:2.5rem;">🗺️</div>
           <div style="color:#334155; font-size:0.85rem; font-family:'JetBrains Mono',monospace; letter-spacing:0.05em;">
             ENTER A TRIP TO SEE THE MAP
           </div>
         </div>
         """, unsafe_allow_html=True)
-
 
 # ============================================================
 # SECTION 2 — CURRENT WEEK BRAND RANKING
