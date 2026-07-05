@@ -640,8 +640,7 @@ with col_right:
                             st_folium(
                                 route_map,
                                 width="100%",
-                                height= MAP_HEIGHT,
-                                scrolling=False
+                                height= MAP_HEIGHT
                                 )
 
                             # Show route result cards
