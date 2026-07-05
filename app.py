@@ -10,6 +10,54 @@ import polyline
 import streamlit.components.v1 as components
 from datetime import datetime
 from dotenv import load_dotenv
+import base64
+
+
+# ============================================================
+# CONVERT LOGO TO BASE64 (Bypasses folder path errors)
+# ============================================================
+def get_base64_image(image_path):
+    if os.path.exists(image_path):
+        with open(image_path, "rb") as img_file:
+            return base64.b64encode(img_file.read()).decode()
+    return ""
+
+logo_base64 = get_base64_image("litroph_logo.png")
+
+# ============================================================
+# INJECT RESPONSIVE EMBEDDED CSS
+# ============================================================
+st.markdown(f"""
+<style>
+/* 1. DESKTOP VIEW: Keeps logo safely inside its column container */
+.logo-container img {{
+    max-width: 180px;
+    height: auto;
+    display: block;
+    margin-top: 45px;
+}}
+
+/* 2. MOBILE VIEW BREAKOUT (Screens under 768px wide) */
+@media (max-width: 768px) {{
+    .logo-container img {{
+        position: absolute !important;
+        top: 12px !important;
+        right: 15px !important;
+        max-width: 95px !important; /* Made slightly smaller for mobile balance */
+        margin-top: 0px !important;
+        z-index: 99999 !important;
+    }}
+    .hero-title {{
+        padding-right: 85px; /* Prevents text from slipping behind floating logo */
+    }}
+}}
+
+/* 3. CLEAN SEPARATOR BETWEEN COMPONENTS */
+.map-output-spacing {{
+    margin-bottom: 12px;
+}}
+</style>
+""", unsafe_allow_html=True)
 
 load_dotenv()
 
@@ -529,17 +577,10 @@ if data_ok and not df_prices.empty:
 
 
 # ============================================================
-# HERO
+# HERO & UNIFIED RESPONSIVE LOGO
 # ============================================================
-# Mobile logo — top-left, only visible on small screens
-st.markdown("""
-<div class="mobile-logo">
-  <img src="app/static/litroph_logo.png" alt="LitroPH logo"/>
-  <span class="mobile-logo-text">LitroPH</span>
-</div>
-""", unsafe_allow_html=True)
-
 col_hero, col_logo = st.columns([3, 1])
+
 with col_hero:
     st.markdown("""
     <div class="hero">
@@ -551,10 +592,15 @@ with col_hero:
       </div>
     </div>
     """, unsafe_allow_html=True)
+
 with col_logo:
-    st.markdown('<div class="desktop-logo">', unsafe_allow_html=True)
-    st.image("litroph_logo.png", width=180)
-    st.markdown('</div>', unsafe_allow_html=True)
+    if logo_base64:
+        # Injects the Base64 string directly into a responsive container wrapper
+        st.markdown(f"""
+        <div class="logo-container">
+            <img src="data:image/png;base64,{logo_base64}" alt="Litroph Logo">
+        </div>
+        """, unsafe_allow_html=True)
 
 
 # ============================================================
@@ -640,21 +686,27 @@ with col_right:
 
                             routes.sort(key=lambda x: x["cost"])
 
-                            # Show map
+                            # ============================================================
+                            # SHOW MAP (Integrated Fix)
+                            # ============================================================
                             route_map = build_route_map(
                                 routes, origin_lat, origin_lon,
                                 dest_lat, dest_lon,
                                 origin_input, dest_input
                             )
-                            st.markdown('<div class="map-container">', unsafe_allow_html=True)
+                            
+                            # Native height budget matched exactly to the placeholder
                             components.html(
                                 route_map._repr_html_(),
-                                height=320,
-                                scrolling=False
+                                height=400
                             )
-                            st.markdown('</div>', unsafe_allow_html=True)
-
-                            # Show route result cards
+                            
+                            # Safe structural spacer to push subsequent elements cleanly downward
+                            st.markdown("<div class='map-output-spacing'></div>", unsafe_allow_html=True)
+                            
+                            # ============================================================
+                            # SHOW ROUTE RESULT CARDS
+                            # ============================================================
                             st.markdown(f"<div style='font-size:0.72rem;color:#475569;font-family:JetBrains Mono,monospace;margin:0.75rem 0 0.5rem 0;letter-spacing:0.08em;'>FUEL · {price_label.upper()}</div>", unsafe_allow_html=True)
 
                             rank_colors = ["#10B981", "#F5A623", "#EF4444"]
@@ -679,12 +731,12 @@ with col_right:
                                     </div>
                                     """, unsafe_allow_html=True)
     else:
-        # Placeholder state
+        # PLACEHOLDER STATE: Height set explicitly to 400 to match the iframe exactly
         st.markdown("""
-        <div class="map-container" style="background:#111827;border:1px solid #1E2A40;border-radius:8px;
-             display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.75rem;">
+        <div style="height:400px; background:#111827; border:1px solid #1E2A40; border-radius:8px;
+                     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.75rem;">
           <div style="font-size:2.5rem;">🗺️</div>
-          <div style="color:#334155;font-size:0.85rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;">
+          <div style="color:#334155; font-size:0.85rem; font-family:'JetBrains Mono',monospace; letter-spacing:0.05em;">
             ENTER A TRIP TO SEE THE MAP
           </div>
         </div>
