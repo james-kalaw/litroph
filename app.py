@@ -17,7 +17,7 @@ load_dotenv()
 # PAGE CONFIG — must be first Streamlit call
 # ============================================================
 st.set_page_config(
-    page_title="LitroPH — Fuel Efficiency Route Optimizer",
+    page_title="LitroPH — Fuel Route Optimizer",
     page_icon="litroph_icon.png",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -240,15 +240,59 @@ st.markdown("""
     margin: 2rem 0;
   }
 
-  /* ── Map responsive height ── */
-  iframe {
-    min-height: 280px;
+  /* ── Map container — fixed height regardless of content below ── */
+  .map-container {
+    width: 100%;
+    height: 320px;
+    position: relative;
   }
-  @media (min-width: 768px) {
-    iframe {
-      min-height: 380px;
+  .map-container iframe {
+    width: 100% !important;
+    height: 320px !important;
+    min-height: 320px !important;
+    border-radius: 8px;
+  }
+
+  /* ── Mobile logo: top-left, hidden on desktop ── */
+  .mobile-logo {
+    display: none;
+  }
+  @media (max-width: 768px) {
+    .mobile-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 0 0.5rem 0;
+    }
+    .mobile-logo img {
+      width: 40px;
+      height: 40px;
+    }
+    .mobile-logo-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #F5A623;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    /* Hide the desktop hero logo column on mobile */
+    .desktop-logo {
+      display: none;
+    }
+    /* Tighten hero title on mobile */
+    .hero-title {
+      font-size: 2rem !important;
     }
   }
+  @media (min-width: 769px) {
+    .mobile-logo {
+      display: none;
+    }
+  }
+
+  /* ── Footer ── */
+  .app-footer {
     margin-top: 4rem;
     padding-top: 1.5rem;
     border-top: 1px solid #1E2A40;
@@ -483,35 +527,18 @@ if data_ok and not df_prices.empty:
     ticker_html += "</div>"
     st.markdown(ticker_html, unsafe_allow_html=True)
 
-# ============================================================
-# INJECT RESPONSIVE LAYOUT CSS
-# ============================================================
-st.markdown("""
-<style>
-/* 1. MOBILE RESPONSIVE LOGO BREAKOUT RULES */
-@media (max-width: 768px) {
-    .responsive-logo img {
-        position: absolute !important;
-        top: 15px !important;
-        right: 15px !important;
-        width: 100px !important;
-        z-index: 999999 !important;
-    }
-    .hero-title {
-        padding-right: 90px;
-    }
-}
-
-/* 2. SPACING BETWEEN SECTIONS */
-.map-spacer {
-    margin-bottom: 17px;
-}
-</style>
-""", unsafe_allow_html=True)
 
 # ============================================================
 # HERO
 # ============================================================
+# Mobile logo — top-left, only visible on small screens
+st.markdown("""
+<div class="mobile-logo">
+  <img src="app/static/litroph_logo.png" alt="LitroPH logo"/>
+  <span class="mobile-logo-text">LitroPH</span>
+</div>
+""", unsafe_allow_html=True)
+
 col_hero, col_logo = st.columns([3, 1])
 with col_hero:
     st.markdown("""
@@ -524,12 +551,8 @@ with col_hero:
       </div>
     </div>
     """, unsafe_allow_html=True)
-
 with col_logo:
-    # Desktop layout margin push
-    st.markdown("<div style='margin-top: 45px;'></div>", unsafe_allow_html=True)
-    # Wrapped logo inside a div to target mobile CSS scaling rules cleanly
-    st.markdown('<div class="responsive-logo">', unsafe_allow_html=True)
+    st.markdown('<div class="desktop-logo">', unsafe_allow_html=True)
     st.image("litroph_logo.png", width=180)
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -623,13 +646,14 @@ with col_right:
                                 dest_lat, dest_lon,
                                 origin_input, dest_input
                             )
+                            st.markdown('<div class="map-container">', unsafe_allow_html=True)
                             components.html(
                                 route_map._repr_html_(),
-                                height=450
+                                height=320,
+                                scrolling=False
                             )
+                            st.markdown('</div>', unsafe_allow_html=True)
 
-                            # Injected a safe HTML margin right here to act as a shield, pushing the cards down
-                            st.markdown("<div style='margin-top: -5px;'></div>", unsafe_allow_html=True)
                             # Show route result cards
                             st.markdown(f"<div style='font-size:0.72rem;color:#475569;font-family:JetBrains Mono,monospace;margin:0.75rem 0 0.5rem 0;letter-spacing:0.08em;'>FUEL · {price_label.upper()}</div>", unsafe_allow_html=True)
 
@@ -657,7 +681,7 @@ with col_right:
     else:
         # Placeholder state
         st.markdown("""
-        <div style="height:380px;background:#111827;border:1px solid #1E2A40;border-radius:8px;
+        <div class="map-container" style="background:#111827;border:1px solid #1E2A40;border-radius:8px;
              display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.75rem;">
           <div style="font-size:2.5rem;">🗺️</div>
           <div style="color:#334155;font-size:0.85rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;">
