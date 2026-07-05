@@ -625,11 +625,11 @@ with col_right:
                             )
                             components.html(
                                 route_map._repr_html_(),
-                                height=500
+                                height=450
                             )
 
                             # Injected a safe HTML margin right here to act as a shield, pushing the cards down
-                            st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
+                            st.markdown("<div style='margin-top: -5px;'></div>", unsafe_allow_html=True)
                             # Show route result cards
                             st.markdown(f"<div style='font-size:0.72rem;color:#475569;font-family:JetBrains Mono,monospace;margin:0.75rem 0 0.5rem 0;letter-spacing:0.08em;'>FUEL · {price_label.upper()}</div>", unsafe_allow_html=True)
 
