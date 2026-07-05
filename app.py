@@ -514,7 +514,7 @@ def get_routes(origin_lat, origin_lon, dest_lat, dest_lon):
             "sections": route.get("sections", [])
         })
 
-    # Deduplicate and sort by cost (cost computed after fuel price known)
+    # Fixed Indentation block for Deduplication
     seen = set()
     unique = []
     for r in routes:
@@ -544,6 +544,18 @@ def build_route_map(routes_with_costs, origin_lat, origin_lon, dest_lat, dest_lo
         zoom_start=13
     )
 
+    # ============================================================
+    # ADDED: FORCED PORTRAIT HEIGHT OVERRIDE INJECTION
+    # ============================================================
+    route_map.get_root().header.add_child(folium.Element("""
+    <style>
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #111827; }
+        .folium-map { width: 100% !important; height: 100% !important; }
+    </style>
+    """))
+    # ============================================================
+
+    # Fixed Indentation for the rendering layers inside the function block
     colors = ["#10B981", "#F5A623", "#EF4444"]
     weights = [7, 5, 4]
     labels = ["RECOMMENDED", "OPTION 2", "OPTION 3"]
@@ -579,6 +591,7 @@ def build_route_map(routes_with_costs, origin_lat, origin_lon, dest_lat, dest_lo
         tooltip=f"START: {origin_label}",
         icon=folium.Icon(color="blue", icon="play", prefix="fa")
     ).add_to(route_map)
+    
     folium.Marker(
         [dest_lat, dest_lon],
         tooltip=f"END: {dest_label}",
