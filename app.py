@@ -31,26 +31,26 @@ def get_base64_image(path):
 logo_base64 = get_base64_image(logo_path)
 
 # ============================================================
-# INJECT RESPONSIVE LAYOUT CSS (Single Logo Pinned Top-Left)
+# INJECT RESPONSIVE LAYOUT CSS (Strict Top-Left Corner Only)
 # ============================================================
 st.markdown(f"""
 <style>
-/* Establish absolute boundary on the main content area */
+/* Establish absolute alignment boundary on the main block */
 [data-testid="stMainBlockContainer"] {{
     position: relative;
-    padding-top: 6rem !important; /* Creates clear breathing room for the top-left logo */
+    padding-top: 5.5rem !important; /* Pushes content down so logo never overlaps title */
 }}
 
-/* STICK TO TOP LEFT CORNER (Desktop & Mobile Viewport) */
-.logo-container {{
+/* FIXED TOP-LEFT DESIGNATION */
+.litroph-unique-left-logo {{
     position: absolute;
-    top: 20px; 
+    top: 15px; 
     left: 45px;
     z-index: 99999;
-    pointer-events: none; /* Allows clicking through any transparent margins */
+    pointer-events: none;
 }}
-.logo-container img {{
-    width: 140px;
+.litroph-unique-left-logo img {{
+    width: 130px;
     height: auto;
     display: block;
 }}
@@ -71,16 +71,15 @@ st.markdown(f"""
 
 /* MOBILE RESPONSIVE ADAPTATION */
 @media (max-width: 768px) {{
-    /* Keep single logo pinned top-left, scaling down cleanly on mobile mobile viewports */
-    .logo-container {{
+    .litroph-unique-left-logo {{
         top: 15px !important;
-        left: 20px !important;
+        left: 15px !important;
     }}
-    .logo-container img {{
-        width: 100px !important;
+    .litroph-unique-left-logo img {{
+        width: 90px !important;
     }}
     
-    /* Force live TomTom map iframe to render as a clean landscape rectangle */
+    /* Force live TomTom map iframe to remain a landscape rectangle */
     div[data-testid="stCustomComponentV1"] iframe {{
         width: 100% !important;
         height: 240px !important;
@@ -93,7 +92,7 @@ st.markdown(f"""
 }}
 </style>
 
-<div class="logo-container">
+<div class="litroph-unique-left-logo">
     <img src="data:image/png;base64,{logo_base64}">
 </div>
 """, unsafe_allow_html=True)
@@ -631,15 +630,6 @@ with col_hero:
       </div>
     </div>
     """, unsafe_allow_html=True)
-
-with col_logo:
-    if logo_base64:
-        # Injects the Base64 string directly into a responsive container wrapper
-        st.markdown(f"""
-        <div class="logo-container">
-            <img src="data:image/png;base64,{logo_base64}" alt="Litroph Logo">
-        </div>
-        """, unsafe_allow_html=True)
 
 
 # ============================================================
