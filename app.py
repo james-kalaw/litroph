@@ -483,6 +483,38 @@ if data_ok and not df_prices.empty:
     ticker_html += "</div>"
     st.markdown(ticker_html, unsafe_allow_html=True)
 
+# ============================================================
+# INJECT RESPONSIVE LAYOUT CSS
+# ============================================================
+st.markdown("""
+<style>
+/* 1. MOBILE RESPONSIVE LOGO BREAKOUT RULES */
+@media (max-width: 768px) {
+    /* Targets the logo container on mobile devices */
+    .responsive-logo img {
+        position: absolute !important;
+        top: 15px !important;
+        right: 15px !important;
+        width: 100px !important; /* Makes it smaller on mobile screen sizes */
+        z-index: 999999 !important;
+    }
+    /* Prevents layout shifts in text components on small widths */
+    .hero-title {
+        padding-right: 90px;
+    }
+}
+
+/* 2. DYNAMIC FULL-HEIGHT MAP SPACING PROTECTION */
+.stFoliumContainer {
+    height: calc(100vh - 380px) !important;
+    min-height: 480px !important;
+    width: 100% !important;
+}
+iframe {
+    height: 100% !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # ============================================================
 # HERO
@@ -499,10 +531,14 @@ with col_hero:
       </div>
     </div>
     """, unsafe_allow_html=True)
+
 with col_logo:
-    # This injects a 45-pixel invisible space to push the logo downwards
+    # Desktop layout margin push
     st.markdown("<div style='margin-top: 45px;'></div>", unsafe_allow_html=True)
+    # Wrapped logo inside a div to target mobile CSS scaling rules cleanly
+    st.markdown('<div class="responsive-logo">', unsafe_allow_html=True)
     st.image("litroph_logo.png", width=180)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ============================================================
