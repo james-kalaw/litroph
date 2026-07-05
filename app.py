@@ -10,10 +10,8 @@ import polyline
 import streamlit.components.v1 as components
 from datetime import datetime
 from dotenv import load_dotenv
-from streamlit_folium import st_folium
 
 load_dotenv()
-MAP_HEIGHT = 500
 
 # ============================================================
 # PAGE CONFIG — must be first Streamlit call
@@ -382,9 +380,7 @@ def build_route_map(routes_with_costs, origin_lat, origin_lon, dest_lat, dest_lo
     route_map = folium.Map(
         location=[center_lat, center_lon],
         tiles="CartoDB dark_matter",
-        zoom_start=13,
-        width="100%",
-        height=550
+        zoom_start=13
     )
 
     colors = ["#10B981", "#F5A623", "#EF4444"]
@@ -487,38 +483,6 @@ if data_ok and not df_prices.empty:
     ticker_html += "</div>"
     st.markdown(ticker_html, unsafe_allow_html=True)
 
-# ============================================================
-# INJECT RESPONSIVE LAYOUT CSS
-# ============================================================
-st.markdown("""
-<style>
-/* 1. MOBILE RESPONSIVE LOGO BREAKOUT RULES */
-@media (max-width: 768px) {
-    /* Targets the logo container on mobile devices */
-    .responsive-logo img {
-        position: absolute !important;
-        top: 15px !important;
-        right: 15px !important;
-        width: 100px !important; /* Makes it smaller on mobile screen sizes */
-        z-index: 999999 !important;
-    }
-    /* Prevents layout shifts in text components on small widths */
-    .hero-title {
-        padding-right: 90px;
-    }
-}
-
-/* 2. DYNAMIC FULL-HEIGHT MAP SPACING PROTECTION */
-.stFoliumContainer {
-    height: calc(100vh - 380px) !important;
-    min-height: 480px !important;
-    width: 100% !important;
-}
-iframe {
-    height: 100% !important;
-}
-</style>
-""", unsafe_allow_html=True)
 
 # ============================================================
 # HERO
@@ -535,26 +499,15 @@ with col_hero:
       </div>
     </div>
     """, unsafe_allow_html=True)
-
 with col_logo:
-    # Desktop layout margin push
+    # This injects a 45-pixel invisible space to push the logo downwards
     st.markdown("<div style='margin-top: 45px;'></div>", unsafe_allow_html=True)
-    # Wrapped logo inside a div to target mobile CSS scaling rules cleanly
-    st.markdown('<div class="responsive-logo">', unsafe_allow_html=True)
     st.image("litroph_logo.png", width=180)
-    st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ============================================================
 # SECTION 1 — ROUTE CALCULATOR
 # ============================================================
-
-# -------------------------------
-# Session State
-# -------------------------------
-if "route_results" not in st.session_state:
-    st.session_state.route_results = None
-
 st.markdown("""
 <div class="section-header">
   <span class="section-icon">🗺️</span>
@@ -565,25 +518,12 @@ st.markdown("""
 
 col_left, col_right = st.columns([1, 1.6], gap="large")
 
-# ============================================================
-# LEFT PANEL
-# ============================================================
 with col_left:
-
-    origin_input = st.text_input(
-        "Origin",
-        placeholder="e.g. SM North EDSA, Quezon City"
-    )
-
-    dest_input = st.text_input(
-        "Destination",
-        placeholder="e.g. Ayala Center, Makati"
-    )
+    origin_input = st.text_input("Origin", placeholder="e.g. SM North EDSA, Quezon City")
+    dest_input = st.text_input("Destination", placeholder="e.g. Ayala Center, Makati")
 
     col_a, col_b = st.columns(2)
-
     with col_a:
-
         fuel_options = {
             "Diesel": "diesel",
             "Unleaded 91": "unleaded-91",
@@ -592,276 +532,108 @@ with col_left:
             "Prem Diesel": "prem-diesel",
             "Kerosene": "kerosene",
         }
-
-        fuel_label = st.selectbox(
-            "Fuel type",
-            list(fuel_options.keys())
-        )
-
+        fuel_label = st.selectbox("Fuel type", list(fuel_options.keys()))
         fuel_slug = fuel_options[fuel_label]
-
     with col_b:
-
         brands_available = (
-            sorted(
-                df_prices[
-                    df_prices["fuel_type_slug"] == fuel_slug
-                ]["brand"].unique().tolist()
-            )
-            if data_ok and not df_prices.empty
-            else []
+            sorted(df_prices[df_prices["fuel_type_slug"] == fuel_slug]["brand"].unique().tolist())
+            if data_ok and not df_prices.empty else []
         )
-
         brand_options = ["National average"] + brands_available
-
-        brand_choice = st.selectbox(
-            "Gas station brand",
-            brand_options
-        )
+        brand_choice = st.selectbox("Gas station brand", brand_options)
 
     km_per_liter = st.number_input(
         "Your car's fuel efficiency (km/L)",
-        min_value=1.0,
-        max_value=40.0,
-        value=12.0,
-        step=0.5,
+        min_value=1.0, max_value=40.0, value=12.0, step=0.5,
         help="Check your dashboard trip computer. Most Metro Manila city cars: 8–15 km/L."
     )
 
-    calculate_btn = st.button(
-        "⚡ Calculate Cheapest Route",
-        use_container_width=True
-    )
+    calculate_btn = st.button("⚡ Calculate Cheapest Route")
 
-# ============================================================
-# RIGHT PANEL
-# ============================================================
 with col_right:
-
-    # =============================================
-    # CALCULATE ONLY WHEN BUTTON IS CLICKED
-    # =============================================
     if calculate_btn:
-
         if not origin_input or not dest_input:
-
             st.warning("Please enter both origin and destination.")
-
         else:
-
             with st.spinner("Fetching live traffic data from TomTom..."):
-
                 origin_lat, origin_lon = geocode(origin_input)
                 dest_lat, dest_lon = geocode(dest_input)
 
                 if not origin_lat or not dest_lat:
-
-                    st.error(
-                        "Could not geocode one or both locations."
-                    )
-
+                    st.error("Could not geocode one or both locations. Try a more specific address.")
                 else:
-
-                    # Fuel price
+                    # Get fuel price
                     if brand_choice == "National average":
-
-                        fuel_price = get_average_price(
-                            df_prices,
-                            fuel_slug
-                        )
-
-                        price_label = (
-                            f"National avg · ₱{fuel_price:.2f}/L"
-                        )
-
+                        fuel_price = get_average_price(df_prices, fuel_slug)
+                        price_label = f"National avg · ₱{fuel_price:.2f}/L"
                     else:
-
-                        fuel_price = get_brand_price(
-                            df_prices,
-                            fuel_slug,
-                            brand_choice
-                        )
-
-                        price_label = (
-                            f"{brand_choice} · ₱{fuel_price:.2f}/L"
-                        )
+                        fuel_price = get_brand_price(df_prices, fuel_slug, brand_choice)
+                        price_label = f"{brand_choice} · ₱{fuel_price:.2f}/L"
 
                     if not fuel_price:
-
-                        st.error(
-                            "Price data unavailable."
-                        )
-
+                        st.error("Price data not available for this fuel type.")
                     else:
-
-                        routes = get_routes(
-                            origin_lat,
-                            origin_lon,
-                            dest_lat,
-                            dest_lon
-                        )
+                        routes = get_routes(origin_lat, origin_lon, dest_lat, dest_lon)
 
                         if not routes:
-
-                            st.error(
-                                "Could not fetch routes."
-                            )
-
+                            st.error("Could not fetch routes. Check TomTom API key.")
                         else:
-
-                            # Compute costs
+                            # Compute cost per route
                             for r in routes:
-
                                 cost, mult = calculate_cost(
-                                    r["distance_km"],
-                                    km_per_liter,
-                                    r["traffic_multiplier"],
-                                    fuel_price
+                                    r["distance_km"], km_per_liter,
+                                    r["traffic_multiplier"], fuel_price
                                 )
-
                                 r["cost"] = cost
 
-                            routes.sort(
-                                key=lambda x: x["cost"]
-                            )
+                            routes.sort(key=lambda x: x["cost"])
 
+                            # Show map
                             route_map = build_route_map(
-                                routes,
-                                origin_lat,
-                                origin_lon,
-                                dest_lat,
-                                dest_lon,
-                                origin_input,
-                                dest_input
+                                routes, origin_lat, origin_lon,
+                                dest_lat, dest_lon,
+                                origin_input, dest_input
+                            )
+                            components.html(
+                                route_map._repr_html_(),
+                                height=320
                             )
 
-                            # Save results
-                            st.session_state.route_results = {
-                                "map": route_map,
-                                "routes": routes,
-                                "price_label": price_label
-                            }
+                            # Show route result cards
+                            st.markdown(f"<div style='font-size:0.72rem;color:#475569;font-family:JetBrains Mono,monospace;margin:0.75rem 0 0.5rem 0;letter-spacing:0.08em;'>FUEL · {price_label.upper()}</div>", unsafe_allow_html=True)
 
-    # =============================================
-    # DISPLAY
-    # =============================================
-    if st.session_state.route_results is None:
+                            rank_colors = ["#10B981", "#F5A623", "#EF4444"]
+                            rank_labels = ["RECOMMENDED", "OPTION 2", "OPTION 3"]
+                            rank_card_class = ["route-recommended", "route-option", "route-option"]
 
+                            result_cols = st.columns(len(routes[:3]))
+                            for i, (col, route) in enumerate(zip(result_cols, routes[:3])):
+                                with col:
+                                    savings = routes[0]["cost"] - route["cost"] if i > 0 else None
+                                    traffic_pct = int((1 - route["traffic_multiplier"]) * 100)
+                                    st.markdown(f"""
+                                    <div class="{rank_card_class[i]}">
+                                      <div class="route-label" style="color:{rank_colors[i]};">{rank_labels[i]}</div>
+                                      <div class="route-cost" style="color:{rank_colors[i]};">₱{route['cost']:.2f}</div>
+                                      <div class="route-meta">
+                                        {route['distance_km']:.1f} km &nbsp;·&nbsp;
+                                        {route['live_time_min']:.0f} min
+                                        {f'&nbsp;·&nbsp;<span style="color:#EF4444;">+{traffic_pct}% traffic</span>' if traffic_pct > 5 else ''}
+                                      </div>
+                                      {'<div class="route-meta" style="color:#10B981;margin-top:0.4rem;">Saves ₱' + f"{abs(savings):.2f}" + ' vs Option 1</div>' if savings is not None and savings < 0 else ''}
+                                    </div>
+                                    """, unsafe_allow_html=True)
+    else:
+        # Placeholder state
         st.markdown("""
-        <div style="
-            height:550px;
-            background:#111827;
-            border:1px solid #1E2A40;
-            border-radius:8px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            flex-direction:column;
-            gap:0.75rem;
-        ">
-            <div style="font-size:2.5rem;">🗺️</div>
-
-            <div style="
-                color:#334155;
-                font-size:0.85rem;
-                font-family:'JetBrains Mono', monospace;
-                letter-spacing:0.05em;
-            ">
-                ENTER A TRIP TO SEE THE MAP
-            </div>
+        <div style="height:380px;background:#111827;border:1px solid #1E2A40;border-radius:8px;
+             display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.75rem;">
+          <div style="font-size:2.5rem;">🗺️</div>
+          <div style="color:#334155;font-size:0.85rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;">
+            ENTER A TRIP TO SEE THE MAP
+          </div>
         </div>
         """, unsafe_allow_html=True)
-
-    else:
-
-        result = st.session_state.route_results
-
-        st_folium(
-            result["map"],
-            width="100%",
-            height=550,
-            key="route_map"
-        )
-
-        st.markdown(
-            f"""
-            <div style="
-            font-size:0.72rem;
-            color:#475569;
-            font-family:JetBrains Mono,monospace;
-            margin:0.75rem 0 0.5rem 0;
-            letter-spacing:0.08em;
-            ">
-            FUEL · {result['price_label'].upper()}
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        routes = result["routes"]
-
-        rank_colors = ["#10B981", "#F5A623", "#EF4444"]
-        rank_labels = ["RECOMMENDED", "OPTION 2", "OPTION 3"]
-        rank_card_class = [
-            "route-recommended",
-            "route-option",
-            "route-option"
-        ]
-
-        result_cols = st.columns(len(routes[:3]))
-
-        for i, (col, route) in enumerate(
-            zip(result_cols, routes[:3])
-        ):
-
-            with col:
-
-                savings = (
-                    routes[0]["cost"] - route["cost"]
-                    if i > 0
-                    else None
-                )
-
-                traffic_pct = int(
-                    (1 - route["traffic_multiplier"]) * 100
-                )
-
-                st.markdown(f"""
-                <div class="{rank_card_class[i]}">
-
-                    <div class="route-label"
-                    style="color:{rank_colors[i]};">
-
-                    {rank_labels[i]}
-
-                    </div>
-
-                    <div class="route-cost"
-                    style="color:{rank_colors[i]};">
-
-                    ₱{route['cost']:.2f}
-
-                    </div>
-
-                    <div class="route-meta">
-
-                    {route['distance_km']:.1f} km ·
-                    {route['live_time_min']:.0f} min
-
-                    {" · <span style='color:#EF4444;'>+" + str(traffic_pct) + "% traffic</span>" if traffic_pct > 5 else ""}
-
-                    </div>
-
-                    {
-                    "<div class='route-meta' style='color:#10B981;margin-top:0.4rem;'>Saves ₱"
-                    + f"{abs(savings):.2f}"
-                    + " vs Option 1</div>"
-                    if savings is not None and savings < 0
-                    else ""
-                    }
-
-                </div>
-                """, unsafe_allow_html=True)
 
 
 # ============================================================
