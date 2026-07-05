@@ -77,28 +77,19 @@ st.markdown(f"""
     font-weight: 400;
 }}
 
-/* PORTRAIT MAP & PLACEHOLDER MEASUREMENTS (Desktop) */
-.map-responsive-box {{
-    width: 100%;
-    height: 500px; /* Increased to make it a taller frame */
-    background: #111827;
-    border: 1px solid #1E2A40;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
+/* AGGRESSIVE IFRAME PORTRAIT OVERRIDE (Desktop & Mobile) */
+iframe[title="streamlit_components.v1.html"] {{
+    height: 520px !important;
+    min-height: 520px !important;
+    border-radius: 8px !important;
 }}
 
-/* Target the live TomTom iframe container wrapper */
-div[data-testid="stCustomComponentV1"] iframe {{
-    width: 100% !important;
-    height: 500px !important;
-    border-radius: 8px;
+div[data-testid="stCustomComponentV1"] {{
+    height: 520px !important;
+    min-height: 520px !important;
 }}
 
-/* MOBILE RESPONSIVE ADAPTATION (Strict Portrait Tuning) */
+/* MOBILE RESPONSIVE ADAPTATION */
 @media (max-width: 768px) {{
     .litroph-header-container {{
         gap: 12px;
@@ -118,15 +109,11 @@ div[data-testid="stCustomComponentV1"] iframe {{
         margin: 2px 0 0 0;
     }}
     
-    /* Force live TomTom map iframe into a distinct portrait shape on mobile */
-    div[data-testid="stCustomComponentV1"] iframe {{
-        width: 100% !important;
-        height: 480px !important; /* Taller height on narrow width creates portrait view */
-    }}
-    
-    /* Ensure placeholder box matches the mobile portrait layout exactly */
-    .map-responsive-box {{
-        height: 480px !important;
+    /* Strictly hold the portrait frame dimensions on small screen sizes */
+    iframe[title="streamlit_components.v1.html"],
+    div[data-testid="stCustomComponentV1"] {{
+        height: 500px !important;
+        min-height: 500px !important;
     }}
 }}
 </style>
