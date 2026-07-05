@@ -32,30 +32,32 @@ def get_base64_image(path):
 logo_base64 = get_base64_image(logo_path)
 
 # ============================================================
-# INJECT RESPONSIVE LAYOUT CSS
+# INJECT RESPONSIVE LAYOUT CSS (Single Logo Pinned Top-Right)
 # ============================================================
 st.markdown(f"""
 <style>
-/* App container positioning context */
+/* Establish absolute boundary on the main content container */
 [data-testid="stAppViewContainer"] {{
     position: relative;
 }}
 
-/* LOGO POSITIONING (Top-Right, Scrolls Naturally) */
+/* STICK TO TOP RIGHT CORNER ALWAYS (Desktop & Mobile Viewport) */
 .logo-container {{
     position: absolute;
-    top: 60px; /* Aligns with the upper margin of the main page content */
-    right: 20px;
-    z-index: 99;
+    top: 55px; 
+    right: 30px;
+    z-index: 99999;
+    pointer-events: none; /* Allows interacting with elements beneath the transparency wrap */
 }}
 .logo-container img {{
-    max-width: 140px;
+    width: 140px;
     height: auto;
     display: block;
 }}
 
 /* DESKTOP MAP & PLACEHOLDER MEASUREMENTS */
 .map-responsive-box {{
+    width: 100%;
     height: 400px;
     background: #111827;
     border: 1px solid #1E2A40;
@@ -67,29 +69,26 @@ st.markdown(f"""
     gap: 0.75rem;
 }}
 
-/* MOBILE BREAKOUT ADJUSTMENTS */
+/* MOBILE RESPONSIVE ADAPTATION */
 @media (max-width: 768px) {{
-    /* Shift logo above the title context on mobile views */
+    /* Keep single logo pinned top-right, scaling down cleanly */
     .logo-container {{
-        position: relative !important;
-        top: 0 !important;
-        right: 0 !important;
-        margin-bottom: 15px;
-        display: flex;
-        justify-content: flex-start;
+        top: 25px !important;
+        right: 15px !important;
     }}
     .logo-container img {{
-        max-width: 100px !important;
+        width: 95px !important;
     }}
     
-    /* Force live TomTom map iframe to be a clean landscape rectangle */
+    /* Force live TomTom map iframe to render as a clean landscape rectangle */
     div[data-testid="stCustomComponentV1"] iframe {{
-        height: 220px !important;
+        width: 100% !important;
+        height: 240px !important;
     }}
     
-    /* Force placeholder box to match the live landscape map height exactly */
+    /* Keep placeholder box matching the live landscape map layout exactly */
     .map-responsive-box {{
-        height: 220px !important;
+        height: 240px !important;
     }}
 }}
 </style>
@@ -781,7 +780,7 @@ with col_right:
                 </div>
                 """, unsafe_allow_html=True)
     else:
-        # Uniform placeholder layout configuration
+        # Uniform responsive placeholder layout configuration
         st.markdown("""
         <div class="map-responsive-box">
           <div style="font-size:2.5rem;">🗺️</div>
