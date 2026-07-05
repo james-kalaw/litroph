@@ -12,6 +12,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
+MAP_HEIGHT = 500
 
 # ============================================================
 # PAGE CONFIG — must be first Streamlit call
@@ -483,6 +484,38 @@ if data_ok and not df_prices.empty:
     ticker_html += "</div>"
     st.markdown(ticker_html, unsafe_allow_html=True)
 
+# ============================================================
+# INJECT RESPONSIVE LAYOUT CSS
+# ============================================================
+st.markdown("""
+<style>
+/* 1. MOBILE RESPONSIVE LOGO BREAKOUT RULES */
+@media (max-width: 768px) {
+    /* Targets the logo container on mobile devices */
+    .responsive-logo img {
+        position: absolute !important;
+        top: 15px !important;
+        right: 15px !important;
+        width: 100px !important; /* Makes it smaller on mobile screen sizes */
+        z-index: 999999 !important;
+    }
+    /* Prevents layout shifts in text components on small widths */
+    .hero-title {
+        padding-right: 90px;
+    }
+}
+
+/* 2. DYNAMIC FULL-HEIGHT MAP SPACING PROTECTION */
+.stFoliumContainer {
+    height: calc(100vh - 380px) !important;
+    min-height: 480px !important;
+    width: 100% !important;
+}
+iframe {
+    height: 100% !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # ============================================================
 # HERO
@@ -499,10 +532,14 @@ with col_hero:
       </div>
     </div>
     """, unsafe_allow_html=True)
+
 with col_logo:
-    # This injects a 45-pixel invisible space to push the logo downwards
+    # Desktop layout margin push
     st.markdown("<div style='margin-top: 45px;'></div>", unsafe_allow_html=True)
+    # Wrapped logo inside a div to target mobile CSS scaling rules cleanly
+    st.markdown('<div class="responsive-logo">', unsafe_allow_html=True)
     st.image("litroph_logo.png", width=180)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ============================================================
@@ -594,9 +631,13 @@ with col_right:
                                 dest_lat, dest_lon,
                                 origin_input, dest_input
                             )
+
+                            MAP_HEIGHT = 550
+
                             components.html(
                                 route_map._repr_html_(),
-                                height=320
+                                height=MAP_HEIGHT,
+                                scrolling=False
                             )
 
                             # Show route result cards
@@ -626,7 +667,7 @@ with col_right:
     else:
         # Placeholder state
         st.markdown("""
-        <div style="height:380px;background:#111827;border:1px solid #1E2A40;border-radius:8px;
+        <div style="height:550px;background:#111827;border:1px solid #1E2A40;border-radius:8px;
              display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.75rem;">
           <div style="font-size:2.5rem;">🗺️</div>
           <div style="color:#334155;font-size:0.85rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;">
