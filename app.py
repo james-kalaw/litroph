@@ -490,28 +490,37 @@ st.markdown("""
 <style>
 /* 1. MOBILE RESPONSIVE LOGO BREAKOUT RULES */
 @media (max-width: 768px) {
-    /* Targets the logo container on mobile devices */
     .responsive-logo img {
         position: absolute !important;
         top: 15px !important;
         right: 15px !important;
-        width: 100px !important; /* Makes it smaller on mobile screen sizes */
+        width: 100px !important;
         z-index: 999999 !important;
     }
-    /* Prevents layout shifts in text components on small widths */
     .hero-title {
         padding-right: 90px;
     }
 }
 
-/* 2. DYNAMIC FULL-HEIGHT MAP SPACING PROTECTION */
+/* 2. FIX MAP OVERLAPPING & PUSH CARDS DOWNWARD */
+/* Ensure the map container has an explicit, non-collapsible bounding box */
 .stFoliumContainer {
-    height: calc(100vh - 380px) !important;
-    min-height: 480px !important;
+    height: 500px !important; /* Fixed height ensures stability across mobile & desktop */
+    min-height: 500px !important;
+    width: 100% !important;
+    display: block !important;
+    margin-bottom: 25px !important; /* Explicitly pushes the route cards downward */
+}
+
+/* Force the internal interactive iframe to perfectly match the container boundaries */
+.stFoliumContainer iframe {
+    height: 100% !important;
     width: 100% !important;
 }
-iframe {
-    height: 100% !important;
+
+/* Adds safety padding to the card blocks below the map */
+[data-testid="stVerticalBlock"] > div:has(.stFoliumContainer) + div {
+    margin-top: 20px !important;
 }
 </style>
 """, unsafe_allow_html=True)
