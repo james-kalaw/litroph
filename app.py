@@ -502,25 +502,9 @@ st.markdown("""
     }
 }
 
-/* 2. FIX MAP OVERLAPPING & PUSH CARDS DOWNWARD */
-/* Ensure the map container has an explicit, non-collapsible bounding box */
-.stFoliumContainer {
-    height: 500px !important; /* Fixed height ensures stability across mobile & desktop */
-    min-height: 500px !important;
-    width: 100% !important;
-    display: block !important;
-    margin-bottom: 25px !important; /* Explicitly pushes the route cards downward */
-}
-
-/* Force the internal interactive iframe to perfectly match the container boundaries */
-.stFoliumContainer iframe {
-    height: 100% !important;
-    width: 100% !important;
-}
-
-/* Adds safety padding to the card blocks below the map */
-[data-testid="stVerticalBlock"] > div:has(.stFoliumContainer) + div {
-    margin-top: 20px !important;
+/* 2. SPACING BETWEEN SECTIONS */
+.map-spacer {
+    margin-bottom: 30px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -641,9 +625,11 @@ with col_right:
                             )
                             components.html(
                                 route_map._repr_html_(),
-                                height=320
+                                height=500
                             )
 
+                            # Injected a safe HTML margin right here to act as a shield, pushing the cards down
+                            st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
                             # Show route result cards
                             st.markdown(f"<div style='font-size:0.72rem;color:#475569;font-family:JetBrains Mono,monospace;margin:0.75rem 0 0.5rem 0;letter-spacing:0.08em;'>FUEL · {price_label.upper()}</div>", unsafe_allow_html=True)
 
