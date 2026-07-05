@@ -538,11 +538,62 @@ def build_route_map(routes_with_costs, origin_lat, origin_lon, dest_lat, dest_lo
     center_lat = sum(p[0] for p in all_pts) / len(all_pts)
     center_lon = sum(p[1] for p in all_pts) / len(all_pts)
 
+    # 1. CREATE A FIXED PORTRAIT FIGURE BOUNDARY FIRST
+    portrait_figure = folium.Figure(height=520)
+
+    # 2. CREATE THE MAP AND ATTACH IT TO THE FIGURE
     route_map = folium.Map(
         location=[center_lat, center_lon],
         tiles="CartoDB dark_matter",
         zoom_start=13
     )
+    portrait_figure.add_child(route_map)
+
+    colors = ["#10B981", "#F5A623", "#EF4444"]
+    weights = [7, 5, 4]
+    labels = ["RECOMMENDED", "OPTION 2", "OPTION 3"]
+    opacities = [0.95, 0.65, 0.55]
+
+    for rank, route in reversed(list(enumerate(routes_with_costs[:3]))):
+        label = (f"{labels[rank]}  ·  ₱{route['cost']:.2f}  ·  "
+                 f"{route['distance_km']:.1f} km  ·  "
+                 f"{route['live_time_min']:.0f} min")
+        folium.PolyLine(
+            locations=route["coords"],
+            color=colors[rank],
+            weight=weights[rank],
+            opacity=opacities[rank],
+            tooltip=label,
+            z_index_offset=(3 - rank) * 100
+        ).add_to(route_map)
+
+        for section in route.get("sections", []):
+            if section.get("sectionType") == "TRAFFIC" and section.get("magnitudeOfDelay", 0) >= 3:
+                s, e = section["startPointIndex"], section["endPointIndex"]
+                folium.PolyLine(
+                    locations=route["coords"][s:e + 1],
+                    color="#7F1D1D",
+                    weight=4,
+                    opacity=1.0,
+                    dash_array="6 4",
+                    tooltip=f"Traffic incident (level {section['magnitudeOfDelay']})"
+                ).add_to(route_map)
+
+    folium.Marker(
+        [origin_lat, origin_lon],
+        tooltip=f"START: {origin_label}",
+        icon=folium.Icon(color="blue", icon="play", prefix="fa")
+    ).add_to(route_map)
+    folium.Marker(
+        [dest_lat, dest_lon],
+        tooltip=f"END: {dest_label}",
+        icon=folium.Icon(color="red", icon="stop", prefix="fa")
+    ).add_to(route_map)
+
+    route_map.fit_bounds(all_pts)
+    
+    # 3. CRITICAL: RETURN THE FIGURE, NOT THE MAP
+    return portrait_figure
 
     # ============================================================
     # ADDED: FORCED PORTRAIT HEIGHT OVERRIDE INJECTION
@@ -781,7 +832,7 @@ with col_right:
         # Renders the live interactive route layout map (Dynamic responsive override handled via CSS)
         components.html(
             st.session_state.map_html,
-           height=500
+           height=530
         )
         
         st.markdown("<div class='map-output-spacing'></div>", unsafe_allow_html=True)
