@@ -964,9 +964,7 @@ if data_ok and not df_history.empty:
             f"This chart will populate after the next Tuesday ingestion run."
         )
     else:
-        # 1. Calculate dynamic boundaries to tightly zoom in on the price action
-        y_min = df_history["price_avg"].min() - 2
-        y_max = df_history["price_avg"].max() + 2
+        # 1. Removed the hardcoded y_min and y_max so the chart can breathe!
 
         fig1 = px.line(
             df_history,
@@ -980,15 +978,12 @@ if data_ok and not df_history.empty:
             }
         )
         
-        # 2. Thicker lines and bolder markers for a premium dashboard look
         fig1.update_traces(line=dict(width=3.5), marker=dict(size=10))
         
         fig1.update_layout(
             paper_bgcolor="#0A0F1E",
             plot_bgcolor="#111827",
             font=dict(family="Inter", color="#94A3B8", size=12),
-            
-            # 3. Moved legend horizontally to the top to give the chart more width
             legend=dict(
                 orientation="h",
                 yanchor="bottom",
@@ -1002,7 +997,7 @@ if data_ok and not df_history.empty:
             ),
             xaxis=dict(
                 showgrid=False,
-                type="category",  # 4. Forces equal spacing between dates
+                type="category", 
                 tickformat="%b %d",
                 tickfont=dict(family="JetBrains Mono", size=11, color="#64748B"),
                 linecolor="#1E2A40"
@@ -1011,17 +1006,15 @@ if data_ok and not df_history.empty:
                 showgrid=True,
                 gridcolor="#1E2A40",
                 tickprefix="₱",
-                range=[y_min, y_max],  # 5. Applies the dynamic zoom!
+                autorange=True,  # 2. This is the magic key! Let Plotly auto-scale.
                 tickfont=dict(family="JetBrains Mono", size=11)
             ),
             hovermode="x unified",
-            margin=dict(t=40, b=20, l=10, r=10), # Added top margin for the new legend
+            margin=dict(t=40, b=20, l=10, r=10),
             height=340,
         )
         fig1.update_traces(hovertemplate="₱%{y:.2f}")
         st.plotly_chart(fig1, use_container_width=True, config={"displayModeBar": False})
-
-
 
 
 # ============================================================
