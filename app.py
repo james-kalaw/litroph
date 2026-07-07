@@ -964,10 +964,18 @@ if data_ok and not df_history.empty:
             f"This chart will populate after the next Tuesday ingestion run."
         )
     else:
-        # 1. Removed the hardcoded y_min and y_max so the chart can breathe!
+        # 1. Add a clean dropdown selector right above the chart
+        fuel_options = ["All Fuels"] + list(df_history["fuel_display_name"].unique())
+        selected_fuel = st.selectbox("Filter by Fuel Type", options=fuel_options, index=0)
+
+        # 2. Filter the dataframe based on the user's choice
+        if selected_fuel == "All Fuels":
+            plot_df = df_history
+        else:
+            plot_df = df_history[df_history["fuel_display_name"] == selected_fuel]
 
         fig1 = px.line(
-            df_history,
+            plot_df,
             x="week_date", y="price_avg",
             color="fuel_display_name",
             markers=True,
@@ -1006,7 +1014,7 @@ if data_ok and not df_history.empty:
                 showgrid=True,
                 gridcolor="#1E2A40",
                 tickprefix="₱",
-                autorange=True,  # 2. This is the magic key! Let Plotly auto-scale.
+                autorange=True,  # Allows dramatic zoom when a single fuel is selected
                 tickfont=dict(family="JetBrains Mono", size=11)
             ),
             hovermode="x unified",
