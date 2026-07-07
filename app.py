@@ -964,6 +964,10 @@ if data_ok and not df_history.empty:
             f"This chart will populate after the next Tuesday ingestion run."
         )
     else:
+        # 1. Calculate dynamic boundaries to tightly zoom in on the price action
+        y_min = df_history["price_avg"].min() - 2
+        y_max = df_history["price_avg"].max() + 2
+
         fig1 = px.line(
             df_history,
             x="week_date", y="price_avg",
@@ -975,12 +979,22 @@ if data_ok and not df_history.empty:
                 "fuel_display_name": "Fuel Type"
             }
         )
-        fig1.update_traces(line=dict(width=2), marker=dict(size=6))
+        
+        # 2. Thicker lines and bolder markers for a premium dashboard look
+        fig1.update_traces(line=dict(width=3.5), marker=dict(size=10))
+        
         fig1.update_layout(
             paper_bgcolor="#0A0F1E",
             plot_bgcolor="#111827",
             font=dict(family="Inter", color="#94A3B8", size=12),
+            
+            # 3. Moved legend horizontally to the top to give the chart more width
             legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.05,
+                xanchor="left",
+                x=0,
                 bgcolor="#111827",
                 bordercolor="#1E2A40",
                 borderwidth=1,
@@ -988,6 +1002,7 @@ if data_ok and not df_history.empty:
             ),
             xaxis=dict(
                 showgrid=False,
+                type="category",  # 4. Forces equal spacing between dates
                 tickformat="%b %d",
                 tickfont=dict(family="JetBrains Mono", size=11, color="#64748B"),
                 linecolor="#1E2A40"
@@ -996,11 +1011,11 @@ if data_ok and not df_history.empty:
                 showgrid=True,
                 gridcolor="#1E2A40",
                 tickprefix="₱",
-                range=[60, 130],
+                range=[y_min, y_max],  # 5. Applies the dynamic zoom!
                 tickfont=dict(family="JetBrains Mono", size=11)
             ),
             hovermode="x unified",
-            margin=dict(t=20, b=20, l=10, r=10),
+            margin=dict(t=40, b=20, l=10, r=10), # Added top margin for the new legend
             height=340,
         )
         fig1.update_traces(hovertemplate="₱%{y:.2f}")
