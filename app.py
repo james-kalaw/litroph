@@ -298,7 +298,7 @@ st.markdown("""
   }
 
   /* ── Streamlit widget overrides ── */
-  div[data-testid="stTextInput"] input,
+  div[data-testid="stTextInput"] input,5
   div[data-testid="stNumberInput"] input,
   div[data-testid="stSelectbox"] select {
     background-color: #111827 !important;
@@ -542,12 +542,27 @@ def build_route_map(routes_with_costs, origin_lat, origin_lon, dest_lat, dest_lo
     portrait_figure = folium.Figure(height=520)
 
     # 2. CREATE THE MAP AND ATTACH IT TO THE FIGURE
+    # Replace the placeholder below with your actual Stadia API key
+    STADIA_API_KEY = "paste_your_stadia_key_here"
+    
     route_map = folium.Map(
         location=[center_lat, center_lon],
-        tiles="CartoDB dark_matter",
+        tiles=f"https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{{z}}/{{x}}/{{y}}{{r}}.png?api_key={STADIA_API_KEY}",
+        attr='&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         zoom_start=13
     )
     portrait_figure.add_child(route_map)
+
+    # ============================================================
+    # ADDED: FORCED PORTRAIT HEIGHT OVERRIDE INJECTION
+    # ============================================================
+    route_map.get_root().header.add_child(folium.Element("""
+    <style>
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #111827; }
+        .folium-map { width: 100% !important; height: 100% !important; }
+    </style>
+    """))
+    # ============================================================
 
     colors = ["#10B981", "#F5A623", "#EF4444"]
     weights = [7, 5, 4]
@@ -584,6 +599,7 @@ def build_route_map(routes_with_costs, origin_lat, origin_lon, dest_lat, dest_lo
         tooltip=f"START: {origin_label}",
         icon=folium.Icon(color="blue", icon="play", prefix="fa")
     ).add_to(route_map)
+    
     folium.Marker(
         [dest_lat, dest_lon],
         tooltip=f"END: {dest_label}",
