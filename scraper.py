@@ -1,13 +1,20 @@
 import os
+import sys
 import json
-import boto3
 import uuid
 import re
+import argparse
 import psycopg2
+from pathlib import Path
 from psycopg2.extras import execute_values
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
+
+# Philippines has no DST, so a fixed UTC+8 offset is exact (and avoids needing tzdata on Windows)
+PH_TZ = timezone(timedelta(hours=8))
+RAW_DATA_DIR = Path(__file__).resolve().parent / "data" / "raw"
 
 
 def generate_fuel_slug(display_name):
@@ -17,32 +24,32 @@ def generate_fuel_slug(display_name):
     return re.sub(r'[\s-]+', '-', slug)
 
 
-def lambda_handler(event, context):
-    print("Initializing AWS S3 client...")
-    s3_client = boto3.client('s3')
-    bucket_name = 'litroph-data-lake-james'
+def launch_browser(p):
+    """Launch headless Chromium; fall back to Microsoft Edge where bundled Chromium is blocked (local Windows)."""
+    try:
+        return p.chromium.launch(
+            headless=True,
+            args=['--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
+        )
+    except Exception as e:
+        print(f"Bundled Chromium failed to launch ({e}). Falling back to Microsoft Edge...")
+        return p.chromium.launch(headless=True, channel="msedge")
 
+
+def scrape_prices():
     # 1. Generate Global Run Metadata
+    now = datetime.now(PH_TZ)
     ingestion_run_id = str(uuid.uuid4())
-    extraction_timestamp = datetime.now().isoformat()
-    short_date = datetime.now().strftime('%Y-%m-%d')
+    extraction_timestamp = now.isoformat()
     data_source = "gaswatchph.com"
     price_unit = "PHP_per_liter"
 
     extracted_data = []
 
-    # 2. Run Playwright in Headless Linux Mode
-    print("Launching headless Chromium...")
+    # 2. Run Playwright in Headless Mode
+    print("Launching headless browser...")
     with sync_playwright() as p:
-        browser = p.chromium.launch(
-            headless=True,
-            args=[
-                '--no-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--single-process'
-            ]
-        )
+        browser = launch_browser(p)
         page = browser.new_page()
 
         try:
@@ -77,10 +84,10 @@ def lambda_handler(event, context):
                     week_date_iso = parsed_date.strftime("%Y-%m-%d")
                     print(f"Successfully synchronized with database cycle: '{week_date_iso}'")
                 except ValueError:
-                    week_date_iso = datetime.now().strftime("%Y-%m-%d")
+                    week_date_iso = now.strftime("%Y-%m-%d")
                     print("Warning: Date parse failed. Falling back to execution timestamp.")
             else:
-                week_date_iso = datetime.now().strftime("%Y-%m-%d")
+                week_date_iso = now.strftime("%Y-%m-%d")
                 print("Warning: Date banner not located. Falling back to execution timestamp.")
 
             # 5. Extract Brand x Fuel Type Price Records
@@ -146,15 +153,33 @@ def lambda_handler(event, context):
     # 6. The QA Validation Gate
     print("Executing QA Gate verification...")
     if not extracted_data:
-        raise ValueError("QA Gate Failed: No data extracted. Aborting S3 stream to prevent empty files.")
+        raise ValueError("QA Gate Failed: No data extracted. Aborting to prevent empty files.")
 
     print(f"QA Passed. Successfully extracted {len(extracted_data)} structured records.")
+    return extracted_data
 
-    # 7. Stream Directly to AWS S3 Data Lake
+
+def save_raw_json(extracted_data):
+    """Archive the raw payload to the local data lake (bronze layer)."""
+    RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    short_date = datetime.now(PH_TZ).strftime('%Y-%m-%d')
+    file_path = RAW_DATA_DIR / f"fuel_prices_{short_date}.json"
+
+    file_path.write_text(json.dumps(extracted_data, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"Successfully archived raw payload: {file_path}")
+    return file_path
+
+
+def archive_to_s3(extracted_data):
+    """AWS deployment only: stream the raw payload to the S3 data lake (bronze layer)."""
+    import boto3  # imported here so local and GitHub Actions runs don't need boto3
+
+    bucket_name = os.environ.get('S3_BUCKET', 'litroph-data-lake-james')
+    short_date = datetime.now(PH_TZ).strftime('%Y-%m-%d')
     file_key = f"raw/fuel_prices_{short_date}.json"
-    print(f"Streaming payload to s3://{bucket_name}/{file_key}...")
 
-    s3_client.put_object(
+    print(f"Streaming payload to s3://{bucket_name}/{file_key}...")
+    boto3.client('s3').put_object(
         Bucket=bucket_name,
         Key=file_key,
         Body=json.dumps(extracted_data, ensure_ascii=False),
@@ -162,19 +187,23 @@ def lambda_handler(event, context):
     )
     print(f"Successfully archived raw payload to S3: {file_key}")
 
-    
-    # 8. RELATIONAL RDS DATA WAREHOUSE INGESTION BRIDGE (PHASE 3)
+
+def load_to_postgres(extracted_data):
+    """RELATIONAL DATA WAREHOUSE INGESTION BRIDGE: batch upsert into raw_ingestion."""
+    conn = None
     try:
-        print("Connecting to RDS PostgreSQL instance...")
+        print("Connecting to PostgreSQL warehouse...")
         conn = psycopg2.connect(
             host=os.environ['DB_HOST'],
             database=os.environ['DB_NAME'],
             user=os.environ['DB_USER'],
             password=os.environ['DB_PASSWORD'],
-            port=os.environ['DB_PORT']
+            port=os.environ.get('DB_PORT', '5432'),
+            sslmode=os.environ.get('DB_SSLMODE', 'prefer'),
+            connect_timeout=30
         )
-        print("Connected to RDS. Beginning transactional database ingestion loop...")
-        
+        print("Connected. Beginning transactional database ingestion loop...")
+
         with conn.cursor() as cur:
             # Step A: Batch UPSERT unique brands in ONE query
             unique_brands = list({item['brand'] for item in extracted_data})
@@ -186,14 +215,14 @@ def lambda_handler(event, context):
                 """,
                 [(b,) for b in unique_brands]
             )
-            
+
             # Step B: Fetch ALL brand_id mappings in ONE query into a lookup dictionary
             cur.execute(
                 "SELECT brand_name, brand_id FROM raw_ingestion.dim_brands WHERE brand_name = ANY(%s);",
                 (unique_brands,)
             )
             brand_map = {row[0]: row[1] for row in cur.fetchall()}
-            
+
             # Step C: Batch INSERT all transactional fact rows in ONE execute_values call
             execute_values(cur,
                 """
@@ -222,22 +251,52 @@ def lambda_handler(event, context):
                     for item in extracted_data
                 ]
             )
-            
+            inserted = cur.rowcount
+
             # Commit the transactions only if all batch steps cleared successfully
             conn.commit()
-            print(f"Relational ingestion complete. Loaded {len(extracted_data)} records into RDS.")
-            
+            print(f"Relational ingestion complete. {inserted} new of {len(extracted_data)} records loaded "
+                  f"(duplicates for an already-loaded week are skipped).")
+
     except Exception as db_err:
-        if 'conn' in locals() and conn:
+        if conn:
             conn.rollback()
         print(f"Database ingestion crashed. Rolling back transactions. Error: {str(db_err)}")
         raise db_err
     finally:
-        if 'conn' in locals() and conn:
+        if conn:
             conn.close()
             print("Database connection cleanly closed.")
 
+
+def lambda_handler(event, context):
+    """AWS Lambda entry point (container image in ECR, triggered by EventBridge Scheduler)."""
+    extracted_data = scrape_prices()
+    archive_to_s3(extracted_data)
+    load_to_postgres(extracted_data)
     return {
         'statusCode': 200,
-        'body': f"SUCCESS: Scraped, archived to S3, and cleanly batched {len(extracted_data)} records into RDS PostgreSQL warehouse."
+        'body': f"SUCCESS: Scraped, archived to S3, and loaded {len(extracted_data)} records into PostgreSQL."
     }
+
+
+def main():
+    """Command-line entry point (local runs and the GitHub Actions weekly pipeline)."""
+    parser = argparse.ArgumentParser(description="Scrape weekly PH fuel prices from gaswatchph.com.")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Scrape and save raw JSON only; skip the database load.")
+    args = parser.parse_args()
+
+    load_dotenv()
+    extracted_data = scrape_prices()
+    save_raw_json(extracted_data)
+
+    if args.dry_run:
+        print("Dry run: skipping database load.")
+    else:
+        load_to_postgres(extracted_data)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,7 @@
+# Weekly data pipeline (scraper + dbt). Used by .github/workflows/weekly_pipeline.yml
+# The dashboard's own dependencies are in requirements.txt
+playwright==1.60.0
+beautifulsoup4==4.15.0
+psycopg2-binary==2.9.12
+python-dotenv==1.2.2
+dbt-postgres==1.10.2
