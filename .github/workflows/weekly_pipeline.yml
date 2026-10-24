@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   pipeline:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
       DB_HOST: ${{ secrets.DB_HOST }}
@@ -28,9 +28,9 @@ jobs:
       DB_SSLMODE: require
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
