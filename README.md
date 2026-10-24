@@ -204,8 +204,9 @@ These steps build the whole project on your own machine, from an empty database 
 
 ### Prerequisites
 
-- [Python 3.12](https://www.python.org/downloads/)
+- [Python 3.12](https://www.python.org/downloads/) (the version the pinned requirements are tested with; on Windows, tick **Add python.exe to PATH**)
 - [Git](https://git-scm.com/)
+- [VS Code](https://code.visualstudio.com/) with the Python and Jupyter extensions (optional, for editing and the notebooks)
 - A PostgreSQL database. Either:
   - **Local:** [Docker Desktop](https://www.docker.com/products/docker-desktop/), used in step 3, or
   - **Hosted:** a free [Neon](https://neon.tech/) project, or an AWS RDS instance
@@ -217,7 +218,8 @@ These steps build the whole project on your own machine, from an empty database 
 ```powershell
 git clone https://github.com/james-kalaw/litroph.git
 cd litroph
-python -m venv .venv
+py -3.12 -m venv .venv                # macOS/Linux: python3.12 -m venv .venv
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser   # Windows, once per machine: allows Activate.ps1 to run
 .\.venv\Scripts\Activate.ps1          # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt -r requirements-pipeline.txt
 python -m playwright install chromium
@@ -298,6 +300,18 @@ streamlit run app.py
 ```
 
 Open http://localhost:8501, enter an origin and destination in Metro Manila (for example "SM North EDSA" and "Ayala Center, Makati"), and select **Calculate Cheapest Route**.
+
+### Moving to a new machine
+
+The repository holds all code, SQL, dbt models, deployment files and the raw JSON archive. A few things are deliberately **not** in Git, so carry them over separately (a password manager works well for the first two):
+
+| Item | Why it's not in Git | What to do |
+|---|---|---|
+| `.env` | Holds passwords and API keys | Copy it across, or rebuild it from `.env.example` and your Neon / TomTom / Stadia dashboards |
+| EC2 key pair (`.pem`) | Grants server access | Only needed for the AWS deployment; AWS never lets you download it again |
+| `backups/*.dump` | Full database dumps | The live data stays in your hosted database; keep a recent dump somewhere safe |
+
+Then follow steps 1–7 above. With a hosted database (Neon or RDS) you can skip steps 3 and 4, because the tables and full history are already there.
 
 ### Explore the Phase 1 notebooks (optional)
 
@@ -476,6 +490,8 @@ Screenshots of the AWS deployment, in pipeline order. Account identifiers, endpo
 
 | Symptom | Fix |
 |---|---|
+| `pip install` fails on Windows with `No such file or directory` deep inside `site-packages` | The path exceeded Windows' 260-character limit. Clone into a shorter folder (for example `C:\dev\litroph`) or [enable long paths](https://learn.microsoft.com/windows/win32/fileio/maximum-file-path-limitation#enable-long-paths-in-windows-10-version-1607-and-later) |
+| `Activate.ps1 cannot be loaded because running scripts is disabled` | Run `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` once |
 | `Env var required but not provided: 'DB_HOST'` from dbt | Load `.env` into the session first (step 6 of [Reproduce the project](#reproduce-the-project)) |
 | Scraper fails to launch Chromium on Windows | It retries with Microsoft Edge automatically; make sure Edge is installed |
 | `QA Gate Failed: No data extracted` | GasWatch PH changed its layout or was down; check the site and the selectors in `scraper.py` |
