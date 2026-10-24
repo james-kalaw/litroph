@@ -2,6 +2,11 @@
 
 LitroPH is an end-to-end data engineering project that helps Filipino motorists find the cheapest route, not just the fastest one. It scrapes weekly Philippine pump prices, models them in a PostgreSQL warehouse with dbt, and uses them to price every driving route that the TomTom Routing API suggests, with live traffic taken into account.
 
+The project has two deployments of the same code:
+
+- **Version 1 (AWS):** the main implementation. EventBridge, Lambda, ECR, S3, RDS PostgreSQL and EC2.
+- **Version 2 (free tier):** GitHub Actions, Neon and Streamlit Community Cloud. It keeps the project running at no cost after the AWS free trial ends.
+
 ![Route cost calculator: three live-traffic routes from Cubao to Makati ranked by fuel cost](docs/screenshots/route-calculator.webp)
 
 ## Contents
@@ -15,8 +20,9 @@ LitroPH is an end-to-end data engineering project that helps Filipino motorists 
 - [Repository structure](#repository-structure)
 - [Data model](#data-model)
 - [Reproduce the project](#reproduce-the-project)
-- [Automate and host for free](#automate-and-host-for-free)
-- [Deploy on AWS](#deploy-on-aws)
+- [Version 1: Deploy on AWS](#version-1-deploy-on-aws)
+- [Version 2: Automate and host for free](#version-2-automate-and-host-for-free)
+- [Important reminders](#important-reminders)
 - [AWS implementation](#aws-implementation)
 - [Engineering challenges](#engineering-challenges)
 - [Troubleshooting](#troubleshooting)
@@ -86,7 +92,7 @@ LitroPH follows the **medallion architecture**. Each layer has one job, and the 
 
 The same code deploys two ways.
 
-**AWS deployment**
+**Version 1 · AWS deployment**
 
 ```mermaid
 flowchart LR
@@ -100,7 +106,7 @@ flowchart LR
   AC --> APP["Streamlit on EC2<br/>Nginx + systemd"]
 ```
 
-**Free-tier deployment**
+**Version 2 · Free-tier deployment**
 
 ```mermaid
 flowchart LR
@@ -113,7 +119,7 @@ flowchart LR
   AC --> APP["Streamlit<br/>Community Cloud"]
 ```
 
-| Concern | AWS | Free tier |
+| Concern | Version 1 · AWS | Version 2 · Free tier |
 |---|---|---|
 | Weekly trigger | EventBridge Scheduler, `cron(0 14 ? * TUE *)` Asia/Manila | GitHub Actions, `0 6 * * 2` UTC (same time) |
 | Scraper runtime | Lambda, container image in ECR | GitHub-hosted Ubuntu runner |
@@ -200,7 +206,7 @@ flowchart LR
 
 ## Reproduce the project
 
-These steps build the whole project on your own machine, from an empty database to a running dashboard. Commands are shown for Windows PowerShell, with macOS/Linux equivalents where they differ.
+These steps build the whole project on your own machine, from an empty database to a running dashboard. They are the same for both versions; Version 1 and Version 2 below cover deploying it. Commands are shown for Windows PowerShell, with macOS/Linux equivalents where they differ.
 
 ### Prerequisites
 
@@ -319,48 +325,11 @@ The `Notebooks/` folder holds the original prototypes that proved the logic befo
 
 ---
 
-## Automate and host for free
+## Version 1: Deploy on AWS
 
-This runs the weekly pipeline and the public dashboard at no cost, with no personal machine involved.
+Version 1 is the main implementation of LitroPH: a serverless and managed-service pipeline on Amazon Web Services. These steps rebuild it from an empty AWS account.
 
-### 1. Database on Neon
-
-1. Create a project at [neon.tech](https://neon.tech/) (PostgreSQL 18, a region near your users) with a database named `litroph_db`.
-2. Put its host, user and password in `.env` with `DB_SSLMODE=require`, then run `python scripts/init_db.py`.
-3. Optional: load existing history from another PostgreSQL database with `pg_dump` / `pg_restore`:
-   ```powershell
-   docker run --rm -e PGPASSWORD=<source-password> -v "${PWD}\backups:/backups" postgres:18 pg_dump -h <source-host> -U <user> -d litroph_db --no-owner --no-privileges -Fc -f /backups/litroph.dump
-   docker run --rm -e PGPASSWORD=<neon-password> -v "${PWD}\backups:/backups" postgres:18 pg_restore -h <neon-host> -U <neon-user> -d litroph_db --no-owner --no-privileges /backups/litroph.dump
-   ```
-
-### 2. Weekly pipeline on GitHub Actions
-
-`.github/workflows/weekly_pipeline.yml` runs every Tuesday at 14:00 Philippine time. It installs dependencies, runs `python scraper.py`, runs `dbt run` and `dbt test`, and commits the new raw JSON to `data/raw/`.
-
-1. In the GitHub repository, open **Settings → Secrets and variables → Actions** and add the repository secrets `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` and `DB_PASSWORD`.
-2. Open **Actions → Weekly fuel price pipeline → Run workflow** to test it once by hand.
-
-### 3. Dashboard on Streamlit Community Cloud
-
-1. At [share.streamlit.io](https://share.streamlit.io/), create an app from this repository, branch `main`, main file `app.py`, Python 3.12.
-2. Under **Advanced settings → Secrets**, paste:
-   ```toml
-   DB_HOST = "<neon-host>"
-   DB_PORT = "5432"
-   DB_NAME = "litroph_db"
-   DB_USER = "<neon-user>"
-   DB_PASSWORD = "<neon-password>"
-   DB_SSLMODE = "require"
-   TOMTOM_API_KEY = "<tomtom-key>"
-   STADIA_API_KEY = "<stadia-key>"
-   ```
-3. Deploy. Every push to `main` redeploys the app automatically.
-
-Free-tier behavior: Streamlit apps sleep after a period without visitors and wake in about 30 seconds; Neon suspends idle compute and wakes in about a second. The app reconnects automatically when that happens.
-
----
-
-## Deploy on AWS
+> **Cost:** these services are covered by the AWS Free Tier or trial credits only for a limited time. After that, RDS, EC2, the Elastic IP and other resources are billed. See [Important reminders](#important-reminders) before you start, and before you shut anything down.
 
 This is the full AWS architecture. All resources live in one region (the project uses `us-east-1`). You need the [AWS CLI](https://aws.amazon.com/cli/) configured with an IAM user that can manage these services, and Docker Desktop.
 
@@ -455,9 +424,85 @@ In **EventBridge → Scheduler → Schedules**, create a recurring schedule:
 
 ---
 
+## Version 2: Automate and host for free
+
+Version 2 runs the same code (`scraper.py`, the dbt project and `app.py`) on free services, so the public dashboard and the weekly pipeline stay online after the AWS free trial ends. Nothing is forked: the scraper has a separate entry point for each platform, and every credential comes from environment variables.
+
+It runs at no cost, with no personal machine involved.
+
+### 1. Database on Neon
+
+1. Create a project at [neon.tech](https://neon.tech/) (PostgreSQL 18, a region near your users) with a database named `litroph_db`.
+2. Put its host, user and password in `.env` with `DB_SSLMODE=require`, then run `python scripts/init_db.py`.
+3. Optional: load existing history from another PostgreSQL database with `pg_dump` / `pg_restore`:
+   ```powershell
+   docker run --rm -e PGPASSWORD=<source-password> -v "${PWD}\backups:/backups" postgres:18 pg_dump -h <source-host> -U <user> -d litroph_db --no-owner --no-privileges -Fc -f /backups/litroph.dump
+   docker run --rm -e PGPASSWORD=<neon-password> -v "${PWD}\backups:/backups" postgres:18 pg_restore -h <neon-host> -U <neon-user> -d litroph_db --no-owner --no-privileges /backups/litroph.dump
+   ```
+
+### 2. Weekly pipeline on GitHub Actions
+
+`.github/workflows/weekly_pipeline.yml` runs every Tuesday at 14:00 Philippine time. It installs dependencies, runs `python scraper.py`, runs `dbt run` and `dbt test`, and commits the new raw JSON to `data/raw/`.
+
+1. In the GitHub repository, open **Settings → Secrets and variables → Actions** and add the repository secrets `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` and `DB_PASSWORD`.
+2. Open **Actions → Weekly fuel price pipeline → Run workflow** to test it once by hand.
+
+### 3. Dashboard on Streamlit Community Cloud
+
+1. At [share.streamlit.io](https://share.streamlit.io/), create an app from this repository, branch `main`, main file `app.py`, Python 3.12.
+2. Under **Advanced settings → Secrets**, paste:
+   ```toml
+   DB_HOST = "<neon-host>"
+   DB_PORT = "5432"
+   DB_NAME = "litroph_db"
+   DB_USER = "<neon-user>"
+   DB_PASSWORD = "<neon-password>"
+   DB_SSLMODE = "require"
+   TOMTOM_API_KEY = "<tomtom-key>"
+   STADIA_API_KEY = "<stadia-key>"
+   ```
+3. Deploy. Every push to `main` redeploys the app automatically.
+
+---
+
+## Important reminders
+
+### AWS costs (Version 1)
+
+- The AWS Free Tier and trial credits expire. Check **Billing and Cost Management** regularly and set a budget alert.
+- To stop all charges, delete every Version 1 resource: the EC2 instance, its **Elastic IP** (an unattached Elastic IP is billed), the RDS instance and its snapshots, the Lambda function, the EventBridge schedule, the ECR images and the S3 bucket.
+- Before deleting anything, keep what you can't recreate:
+  - a `pg_dump` of the database (see [Version 2, step 1](#1-database-on-neon)),
+  - a copy of the S3 `raw/` archive (`aws s3 sync s3://<your-bucket>/raw ./s3-raw-backup`), and
+  - screenshots of the deployment, if you want a record of it.
+- Move the dashboard and pipeline to Version 2 first, and confirm one successful weekly run there before shutting Version 1 down.
+
+### Security
+
+- Never commit `.env`, `.pem` keys or database dumps. `.gitignore` already excludes `.env`, `backups/` and `logs/`.
+- If a password, API key or token is ever committed or shared, treat it as public: rotate it immediately. Deleting the file afterwards does not remove it from Git history.
+- Keep the database's inbound rules narrow: your own IP (`/32`) and the app server's security group, never `0.0.0.0/0`.
+- Pushing changes to `.github/workflows/` needs a GitHub login or token with the **workflow** scope.
+
+### Scheduling and data
+
+- GasWatch PH publishes new prices on Tuesdays. Both versions scrape at 14:00 Philippine time; a run before the new week is posted simply loads nothing new.
+- Cron on EC2 and in GitHub Actions runs in **UTC**: 14:00 PHT is `06:00` UTC.
+- GitHub disables scheduled workflows in repositories with no activity for 60 days. The weekly commit to `data/raw/` keeps the schedule alive.
+- The scraper visits one page once a week. Keep it that way, and respect the source site's terms of use.
+
+### Free-tier behavior (Version 2)
+
+- Streamlit Community Cloud apps sleep without visitors; the next visitor wakes them in about 30 seconds.
+- Neon suspends idle compute after a few minutes and wakes in about a second. The app reconnects automatically.
+- TomTom's free tier allows 2,500 requests per day. Stadia Maps requires an API key, or a registered domain, for hosted apps.
+- Free plans and their limits can change. Check each provider's pricing page once in a while.
+
+---
+
 ## AWS implementation
 
-Screenshots of the AWS deployment, in pipeline order. Account identifiers, endpoints and public addresses are blurred.
+Screenshots of the Version 1 deployment, in pipeline order. Account identifiers, endpoints and public addresses are blurred.
 
 | | |
 |---|---|
