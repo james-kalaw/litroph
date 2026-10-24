@@ -4,8 +4,7 @@
 # Sensitive credentials — never commit
 .env
 
-# Local raw data lake — too large and changes weekly
-data/raw/
+# data/raw/ is committed on purpose: it is the bronze layer archived weekly by GitHub Actions
 data/fuel_prices_clean.json
 *.html
 
@@ -29,3 +28,10 @@ Notebooks/archive/
 
 transformation/target/
 transformation/dbt_packages/
+
+# dbt logs
+logs/
+transformation/logs/
+
+# Local database backups (full data dumps)
+backups/

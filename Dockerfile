@@ -8,10 +8,9 @@ RUN dnf install -y nss atk cups-libs libXcomposite libXcursor libXdamage \
     xorg-x11-server-Xvfb
 
 
-# Install Python requirements
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-RUN pip install boto3
+# Install the pipeline requirements (scraper + loader); boto3 is only needed for the S3 archive on AWS
+COPY requirements-pipeline.txt .
+RUN pip install -r requirements-pipeline.txt boto3
 
 # Install Playwright Chromium to a fixed path accessible by any user
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright

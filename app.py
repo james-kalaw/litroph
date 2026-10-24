@@ -428,18 +428,31 @@ st.markdown("""
 # ============================================================
 @st.cache_resource
 def init_connection():
-    return psycopg2.connect(
+    conn = psycopg2.connect(
         host=os.getenv("DB_HOST"),
         database=os.getenv("DB_NAME"),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
-        port=os.getenv("DB_PORT", "5432")
+        port=os.getenv("DB_PORT", "5432"),
+        sslmode=os.getenv("DB_SSLMODE", "prefer")
     )
+    # Autocommit so SELECTs never leave the session "idle in transaction".
+    # An open transaction holds a read lock that blocks dbt from rebuilding tables.
+    conn.autocommit = True
+    return conn
+
+def run_query(query):
+    """Run a read query, reconnecting once if the cached connection was dropped
+    (e.g. Neon suspending the database after inactivity)."""
+    try:
+        return pd.read_sql(query, init_connection())
+    except (psycopg2.OperationalError, psycopg2.InterfaceError):
+        init_connection.clear()
+        return pd.read_sql(query, init_connection())
 
 @st.cache_data(ttl=3600)
 def get_latest_prices():
     """Fetch current week brand prices from analytical_core."""
-    conn = init_connection()
     query = """
         SELECT brand, fuel_display_name, fuel_type_slug,
                price_php, price_trend, weekly_change_php, week_date
@@ -447,19 +460,18 @@ def get_latest_prices():
         WHERE week_date = (SELECT MAX(week_date) FROM analytical_core.brand_prices_weekly)
         ORDER BY fuel_display_name, price_php ASC
     """
-    return pd.read_sql(query, conn)
+    return run_query(query)
 
 @st.cache_data(ttl=3600)
 def get_price_history():
     """Fetch all weekly price averages per fuel type for trend charts."""
-    conn = init_connection()
     query = """
         SELECT week_date, fuel_display_name, fuel_type_slug,
                price_avg, price_min, price_max, brand_count
         FROM analytical_core.fuel_prices_weekly
         ORDER BY week_date ASC
     """
-    return pd.read_sql(query, conn)
+    return run_query(query)
 
 def get_brand_price(df, fuel_slug, brand):
     """Look up a specific brand's price from the loaded DataFrame."""
@@ -542,8 +554,8 @@ def build_route_map(routes_with_costs, origin_lat, origin_lon, dest_lat, dest_lo
     portrait_figure = folium.Figure(height=520)
 
     # 2. CREATE THE MAP AND ATTACH IT TO THE FIGURE
-    # Replace the placeholder below with your actual Stadia API key
-    STADIA_API_KEY = "paste_your_stadia_key_here"
+    # Stadia API key is loaded from .env (STADIA_API_KEY)
+    STADIA_API_KEY = os.getenv("STADIA_API_KEY")
     
     route_map = folium.Map(
         location=[center_lat, center_lon],

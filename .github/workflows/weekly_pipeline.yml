@@ -1,0 +1,64 @@
+name: Weekly fuel price pipeline
+
+on:
+  schedule:
+    # Every Tuesday 14:00 Asia/Manila (06:00 UTC), same as the AWS EventBridge schedule.
+    # GitHub cron always runs in UTC.
+    - cron: "0 6 * * 2"
+  # Adds a "Run workflow" button under the Actions tab for manual runs
+  workflow_dispatch:
+
+permissions:
+  contents: write  # needed to commit the raw JSON snapshot back to the repo
+
+concurrency:
+  group: weekly-pipeline
+  cancel-in-progress: false
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_SSLMODE: require
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-pipeline.txt
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-pipeline.txt
+          python -m playwright install --with-deps chromium
+
+      # Bronze: scrape gaswatchph.com -> data/raw/*.json + raw_ingestion tables
+      - name: Scrape and load raw prices
+        id: scrape
+        run: python scraper.py
+
+      # Silver/Gold: rebuild analytical_core models, then run data tests
+      - name: Build analytics tables (dbt)
+        working-directory: transformation
+        run: |
+          dbt run --profiles-dir .
+          dbt test --profiles-dir .
+
+      # Archive the raw payload even if dbt fails, so the bronze layer is never lost
+      - name: Commit raw snapshot
+        if: ${{ !cancelled() && steps.scrape.outcome == 'success' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/raw/
+          git diff --cached --quiet || git commit -m "data: weekly fuel price snapshot $(TZ=Asia/Manila date +%F)"
+          git push

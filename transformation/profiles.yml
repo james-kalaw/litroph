@@ -3,11 +3,13 @@ litroph:
   outputs:
     dev:
       type: postgres
-      host: litroph-data-warehouse.colwaceymp8h.us-east-1.rds.amazonaws.com
-      port: 5432
-      user: litroph_admin
-      password: jameskalaw0915
-      dbname: litroph_db
+      # Credentials come from environment variables (.env locally, GitHub Actions secrets in CI)
+      host: "{{ env_var('DB_HOST') }}"
+      port: "{{ env_var('DB_PORT', '5432') | as_number }}"
+      user: "{{ env_var('DB_USER') }}"
+      password: "{{ env_var('DB_PASSWORD') }}"
+      dbname: "{{ env_var('DB_NAME') }}"
+      sslmode: "{{ env_var('DB_SSLMODE', 'prefer') }}"
       schema: analytical_core
       threads: 1
       connect_timeout: 30
