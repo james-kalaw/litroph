@@ -1,0 +1,18 @@
+# /etc/systemd/system/streamlit.service
+# Runs the LitroPH dashboard on the EC2 instance and restarts it on failure or reboot.
+# Credentials are read from the project's .env file instead of being written into this unit.
+
+[Unit]
+Description=Streamlit Fuel Efficiency Web App
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/litroph
+EnvironmentFile=/home/ubuntu/litroph/.env
+ExecStart=/home/ubuntu/litroph/.venv/bin/streamlit run app.py --server.port 8501 --server.address 0.0.0.0
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
