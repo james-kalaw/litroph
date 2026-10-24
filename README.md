@@ -1,5 +1,7 @@
 # LitroPH: Fuel-Efficient Route Optimization Dashboard
 
+**Live demo: [litroph.streamlit.app](https://litroph.streamlit.app/)**
+
 LitroPH is an end-to-end data engineering project that helps Filipino motorists find the cheapest route, not just the fastest one. It scrapes weekly Philippine pump prices, models them in a PostgreSQL warehouse with dbt, and uses them to price every driving route that the TomTom Routing API suggests, with live traffic taken into account.
 
 The project has two deployments of the same code:
