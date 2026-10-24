@@ -685,11 +685,11 @@ def build_route_map(routes_with_costs, origin_lat, origin_lon, dest_lat, dest_lo
 # GEOCODING (TomTom)
 # ============================================================
 def geocode(address):
-    """Resolve an address to (lat, lon). Tries TomTom Geocoding first, then Fuzzy Search,
-    which also matches place names (malls, landmarks) and works on keys without the Geocoding product."""
+    """Resolve an address to (lat, lon). Tries TomTom Fuzzy Search first, which matches place names
+    (malls, landmarks) precisely, then falls back to Geocoding for plain street addresses."""
     api_key = os.getenv("TOMTOM_API_KEY")
     query = requests.utils.quote(address)
-    for endpoint in ("geocode", "search"):
+    for endpoint in ("search", "geocode"):
         url = f"https://api.tomtom.com/search/2/{endpoint}/{query}.json?key={api_key}&countrySet=PH&limit=1"
         try:
             r = requests.get(url, timeout=10)
