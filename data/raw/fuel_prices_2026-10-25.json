@@ -1,7 +1,7 @@
 [
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Shell",
@@ -13,8 +13,8 @@
     "weekly_change": "₱2.60"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Shell",
@@ -26,8 +26,8 @@
     "weekly_change": "₱2.60"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Shell",
@@ -39,8 +39,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Shell",
@@ -52,8 +52,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Shell",
@@ -65,8 +65,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Shell",
@@ -78,21 +78,21 @@
     "weekly_change": "₱1.00"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Petron",
     "fuel_display_name": "Diesel",
     "fuel_type_slug": "diesel",
-    "current_price": "₱94.30",
+    "current_price": "₱94.31",
     "price_unit": "PHP_per_liter",
     "price_trend": "UP",
-    "weekly_change": "₱2.59"
+    "weekly_change": "₱2.60"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Petron",
@@ -104,21 +104,21 @@
     "weekly_change": "₱2.60"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Petron",
     "fuel_display_name": "Unleaded 91",
     "fuel_type_slug": "unleaded-91",
-    "current_price": "₱88.51",
+    "current_price": "₱88.33",
     "price_unit": "PHP_per_liter",
     "price_trend": "DOWN",
-    "weekly_change": "₱4.12"
+    "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Petron",
@@ -130,8 +130,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Petron",
@@ -143,8 +143,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Petron",
@@ -156,8 +156,8 @@
     "weekly_change": "₱1.00"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Caltex",
@@ -169,8 +169,8 @@
     "weekly_change": "₱2.60"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Caltex",
@@ -182,8 +182,8 @@
     "weekly_change": "₱2.60"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Caltex",
@@ -195,8 +195,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Caltex",
@@ -208,8 +208,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Caltex",
@@ -221,8 +221,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Caltex",
@@ -234,8 +234,8 @@
     "weekly_change": "₱1.00"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Phoenix",
@@ -247,8 +247,8 @@
     "weekly_change": "₱2.60"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Phoenix",
@@ -260,8 +260,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Phoenix",
@@ -273,8 +273,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Phoenix",
@@ -286,8 +286,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Phoenix",
@@ -299,8 +299,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Seaoil",
@@ -312,8 +312,8 @@
     "weekly_change": "₱2.60"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Seaoil",
@@ -325,8 +325,8 @@
     "weekly_change": "₱2.60"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Seaoil",
@@ -338,8 +338,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Seaoil",
@@ -351,8 +351,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Seaoil",
@@ -364,21 +364,21 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Seaoil",
     "fuel_display_name": "Prem 97",
     "fuel_type_slug": "prem-97",
-    "current_price": "₱92.31",
+    "current_price": "₱92.41",
     "price_unit": "PHP_per_liter",
     "price_trend": "DOWN",
-    "weekly_change": "₱4.40"
+    "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Seaoil",
@@ -390,34 +390,34 @@
     "weekly_change": "₱1.00"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Unioil",
     "fuel_display_name": "Diesel",
     "fuel_type_slug": "diesel",
-    "current_price": "₱92.96",
+    "current_price": "₱92.97",
     "price_unit": "PHP_per_liter",
     "price_trend": "UP",
-    "weekly_change": "₱2.59"
+    "weekly_change": "₱2.60"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Unioil",
     "fuel_display_name": "Unleaded 91",
     "fuel_type_slug": "unleaded-91",
-    "current_price": "₱88.06",
+    "current_price": "₱88.08",
     "price_unit": "PHP_per_liter",
     "price_trend": "DOWN",
-    "weekly_change": "₱4.32"
+    "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Unioil",
@@ -429,21 +429,21 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Unioil",
     "fuel_display_name": "Prem 95",
     "fuel_type_slug": "prem-95",
-    "current_price": "₱90.84",
+    "current_price": "₱90.89",
     "price_unit": "PHP_per_liter",
     "price_trend": "DOWN",
-    "weekly_change": "₱4.35"
+    "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Unioil",
@@ -455,8 +455,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Jetti",
@@ -468,8 +468,8 @@
     "weekly_change": "₱2.60"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Jetti",
@@ -481,8 +481,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Jetti",
@@ -494,8 +494,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Jetti",
@@ -507,8 +507,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Flying V",
@@ -520,8 +520,8 @@
     "weekly_change": "₱2.60"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Flying V",
@@ -533,8 +533,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Flying V",
@@ -546,8 +546,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Cleanfuel",
@@ -559,8 +559,8 @@
     "weekly_change": "₱2.60"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Cleanfuel",
@@ -572,8 +572,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Cleanfuel",
@@ -585,8 +585,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Total",
@@ -598,8 +598,8 @@
     "weekly_change": "₱2.60"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Total",
@@ -611,8 +611,8 @@
     "weekly_change": "₱2.60"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Total",
@@ -624,8 +624,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Total",
@@ -637,8 +637,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "Total",
@@ -650,8 +650,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "PTT",
@@ -663,8 +663,8 @@
     "weekly_change": "₱2.60"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "PTT",
@@ -676,8 +676,8 @@
     "weekly_change": "₱2.60"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "PTT",
@@ -689,8 +689,8 @@
     "weekly_change": "₱4.30"
   },
   {
-    "ingestion_run_id": "715a87bb-c2ee-49f2-8829-aa0c4a5fab62",
-    "extraction_timestamp": "2026-10-25T00:53:17.836782+08:00",
+    "ingestion_run_id": "af9601a2-6bc2-417a-8163-c416a5dcbf02",
+    "extraction_timestamp": "2026-10-25T13:16:27.025681+08:00",
     "source": "gaswatchph.com",
     "week_date": "2026-10-20",
     "brand": "PTT",
