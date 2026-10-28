@@ -496,6 +496,7 @@ It runs at no cost, with no personal machine involved.
 ### Free-tier behavior (Version 2)
 
 - Streamlit Community Cloud apps sleep without visitors; the next visitor wakes them in about 30 seconds.
+- After changing any secret in Streamlit (**⋮ → Settings → Secrets**), reboot the app (**⋮ → Reboot app**). A running app can keep using the values it started with until it restarts.
 - Neon suspends idle compute after a few minutes and wakes in about a second. The app reconnects automatically.
 - TomTom's free tier allows 2,500 requests per day. Stadia Maps requires an API key, or a registered domain, for hosted apps.
 - Free plans and their limits can change. Check each provider's pricing page once in a while.
@@ -545,6 +546,7 @@ Screenshots of the Version 1 deployment, in pipeline order. Account identifiers,
 | `relation "raw_ingestion.dim_brands" does not exist` | Run `python scripts/init_db.py` |
 | `dbt run` hangs | Something holds a lock on `analytical_core`. Check `SELECT pid, state, query FROM pg_stat_activity WHERE state = 'idle in transaction';` |
 | `dbt test` fails `accepted_values` on `fuel_type_slug` | The site added a fuel type; review it and add the slug to `transformation/models/staging/schema.yml` |
+| Dashboard says "Price data is temporarily unavailable" | Open **Manage app** on the live site and read the `[litroph]` lines in the log. `password authentication failed` means the Streamlit `DB_PASSWORD` secret is outdated: fix it, then **Reboot app** |
 | Map tiles don't load | Check `STADIA_API_KEY` and, for hosted apps, add the app's domain in the Stadia dashboard |
 | "Could not fetch routes" | Check `TOMTOM_API_KEY` and its daily quota (2,500 free requests) |
 
