@@ -112,7 +112,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  GA["GitHub Actions<br/>Tue 14:00 PHT"] --> SC["scraper.py"]
+  GA["GitHub Actions<br/>Tue 14:17 PHT"] --> SC["scraper.py"]
   GW(["gaswatchph.com"]) -. scraped .-> SC
   SC --> J["data/raw/*.json<br/>committed to repo"]
   SC --> RAW[("Neon PostgreSQL<br/>raw_ingestion")]
@@ -123,7 +123,7 @@ flowchart LR
 
 | Concern | Version 1 · AWS | Version 2 · Free tier |
 |---|---|---|
-| Weekly trigger | EventBridge Scheduler, `cron(0 14 ? * TUE *)` Asia/Manila | GitHub Actions, `0 6 * * 2` UTC (same time) |
+| Weekly trigger | EventBridge Scheduler, `cron(0 14 ? * TUE *)` Asia/Manila | GitHub Actions, `17 6 * * 2` UTC (Tue 14:17 PHT) |
 | Scraper runtime | Lambda, container image in ECR | GitHub-hosted Ubuntu runner |
 | Entry point | `scraper.lambda_handler` | `python scraper.py` |
 | Raw archive | S3 `raw/fuel_prices_YYYY-MM-DD.json` | `data/raw/fuel_prices_YYYY-MM-DD.json` |
@@ -444,7 +444,7 @@ It runs at no cost, with no personal machine involved.
 
 ### 2. Weekly pipeline on GitHub Actions
 
-`.github/workflows/weekly_pipeline.yml` runs every Tuesday at 14:00 Philippine time. It installs dependencies, runs `python scraper.py`, runs `dbt run` and `dbt test`, and commits the new raw JSON to `data/raw/`.
+`.github/workflows/weekly_pipeline.yml` runs every Tuesday at 14:17 Philippine time. It installs dependencies, runs `python scraper.py`, runs `dbt run` and `dbt test`, and commits the new raw JSON to `data/raw/`.
 
 1. In the GitHub repository, open **Settings → Secrets and variables → Actions** and add the repository secrets `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` and `DB_PASSWORD`.
 2. Open **Actions → Weekly fuel price pipeline → Run workflow** to test it once by hand.
@@ -488,14 +488,15 @@ It runs at no cost, with no personal machine involved.
 
 ### Scheduling and data
 
-- GasWatch PH publishes new prices on Tuesdays. Both versions scrape at 14:00 Philippine time; a run before the new week is posted simply loads nothing new.
-- Cron on EC2 and in GitHub Actions runs in **UTC**: 14:00 PHT is `06:00` UTC.
+- GasWatch PH publishes new prices on Tuesdays. Version 1 scrapes at 14:00 and Version 2 at 14:17 Philippine time; a run before the new week is posted simply loads nothing new.
+- Cron on EC2 and in GitHub Actions runs in **UTC**: 14:00 PHT is `06:00` UTC. GitHub may also start a scheduled run late (minutes to a few hours) when its servers are busy; the run still completes the same day.
 - GitHub disables scheduled workflows in repositories with no activity for 60 days. The weekly commit to `data/raw/` keeps the schedule alive.
 - The scraper visits one page once a week. Keep it that way, and respect the source site's terms of use.
 
 ### Free-tier behavior (Version 2)
 
 - Streamlit Community Cloud apps sleep without visitors; the next visitor wakes them in about 30 seconds.
+- After changing any secret in Streamlit (**⋮ → Settings → Secrets**), reboot the app (**⋮ → Reboot app**). A running app can keep using the values it started with until it restarts.
 - Neon suspends idle compute after a few minutes and wakes in about a second. The app reconnects automatically.
 - TomTom's free tier allows 2,500 requests per day. Stadia Maps requires an API key, or a registered domain, for hosted apps.
 - Free plans and their limits can change. Check each provider's pricing page once in a while.
@@ -545,6 +546,7 @@ Screenshots of the Version 1 deployment, in pipeline order. Account identifiers,
 | `relation "raw_ingestion.dim_brands" does not exist` | Run `python scripts/init_db.py` |
 | `dbt run` hangs | Something holds a lock on `analytical_core`. Check `SELECT pid, state, query FROM pg_stat_activity WHERE state = 'idle in transaction';` |
 | `dbt test` fails `accepted_values` on `fuel_type_slug` | The site added a fuel type; review it and add the slug to `transformation/models/staging/schema.yml` |
+| Dashboard says "Price data is temporarily unavailable" | Open **Manage app** on the live site and read the `[litroph]` lines in the log. `password authentication failed` means the Streamlit `DB_PASSWORD` secret is outdated: fix it, then **Reboot app** |
 | Map tiles don't load | Check `STADIA_API_KEY` and, for hosted apps, add the app's domain in the Stadia dashboard |
 | "Could not fetch routes" | Check `TOMTOM_API_KEY` and its daily quota (2,500 free requests) |
 
