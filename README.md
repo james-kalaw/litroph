@@ -112,7 +112,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  GA["GitHub Actions<br/>Tue 14:00 PHT"] --> SC["scraper.py"]
+  GA["GitHub Actions<br/>Tue 14:17 PHT"] --> SC["scraper.py"]
   GW(["gaswatchph.com"]) -. scraped .-> SC
   SC --> J["data/raw/*.json<br/>committed to repo"]
   SC --> RAW[("Neon PostgreSQL<br/>raw_ingestion")]
@@ -123,7 +123,7 @@ flowchart LR
 
 | Concern | Version 1 · AWS | Version 2 · Free tier |
 |---|---|---|
-| Weekly trigger | EventBridge Scheduler, `cron(0 14 ? * TUE *)` Asia/Manila | GitHub Actions, `0 6 * * 2` UTC (same time) |
+| Weekly trigger | EventBridge Scheduler, `cron(0 14 ? * TUE *)` Asia/Manila | GitHub Actions, `17 6 * * 2` UTC (Tue 14:17 PHT) |
 | Scraper runtime | Lambda, container image in ECR | GitHub-hosted Ubuntu runner |
 | Entry point | `scraper.lambda_handler` | `python scraper.py` |
 | Raw archive | S3 `raw/fuel_prices_YYYY-MM-DD.json` | `data/raw/fuel_prices_YYYY-MM-DD.json` |
@@ -444,7 +444,7 @@ It runs at no cost, with no personal machine involved.
 
 ### 2. Weekly pipeline on GitHub Actions
 
-`.github/workflows/weekly_pipeline.yml` runs every Tuesday at 14:00 Philippine time. It installs dependencies, runs `python scraper.py`, runs `dbt run` and `dbt test`, and commits the new raw JSON to `data/raw/`.
+`.github/workflows/weekly_pipeline.yml` runs every Tuesday at 14:17 Philippine time. It installs dependencies, runs `python scraper.py`, runs `dbt run` and `dbt test`, and commits the new raw JSON to `data/raw/`.
 
 1. In the GitHub repository, open **Settings → Secrets and variables → Actions** and add the repository secrets `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` and `DB_PASSWORD`.
 2. Open **Actions → Weekly fuel price pipeline → Run workflow** to test it once by hand.
@@ -488,8 +488,8 @@ It runs at no cost, with no personal machine involved.
 
 ### Scheduling and data
 
-- GasWatch PH publishes new prices on Tuesdays. Both versions scrape at 14:00 Philippine time; a run before the new week is posted simply loads nothing new.
-- Cron on EC2 and in GitHub Actions runs in **UTC**: 14:00 PHT is `06:00` UTC.
+- GasWatch PH publishes new prices on Tuesdays. Version 1 scrapes at 14:00 and Version 2 at 14:17 Philippine time; a run before the new week is posted simply loads nothing new.
+- Cron on EC2 and in GitHub Actions runs in **UTC**: 14:00 PHT is `06:00` UTC. GitHub may also start a scheduled run late (minutes to a few hours) when its servers are busy; the run still completes the same day.
 - GitHub disables scheduled workflows in repositories with no activity for 60 days. The weekly commit to `data/raw/` keeps the schedule alive.
 - The scraper visits one page once a week. Keep it that way, and respect the source site's terms of use.
 

@@ -1,4 +1,6 @@
 import os
+import sys
+import time
 import streamlit as st
 import psycopg2
 import pandas as pd
@@ -426,29 +428,40 @@ st.markdown("""
 # ============================================================
 # DATABASE CONNECTION
 # ============================================================
-@st.cache_resource
-def init_connection():
+def open_connection():
     conn = psycopg2.connect(
         host=os.getenv("DB_HOST"),
         database=os.getenv("DB_NAME"),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
         port=os.getenv("DB_PORT", "5432"),
-        sslmode=os.getenv("DB_SSLMODE", "prefer")
+        sslmode=os.getenv("DB_SSLMODE", "prefer"),
+        connect_timeout=30
     )
     # Autocommit so SELECTs never leave the session "idle in transaction".
     # An open transaction holds a read lock that blocks dbt from rebuilding tables.
     conn.autocommit = True
     return conn
 
-def run_query(query):
-    """Run a read query, reconnecting once if the cached connection was dropped
-    (e.g. Neon suspending the database after inactivity)."""
-    try:
-        return pd.read_sql(query, init_connection())
-    except (psycopg2.OperationalError, psycopg2.InterfaceError):
-        init_connection.clear()
-        return pd.read_sql(query, init_connection())
+def run_query(query, attempts=2):
+    """Run a read query on a fresh connection, closed right after.
+    A long-lived connection goes stale when Neon suspends idle compute, and the results
+    are cached for an hour anyway, so a new connection per query costs almost nothing.
+    Retries once to ride out a cold start; failures are logged to the app's server log."""
+    for attempt in range(1, attempts + 1):
+        conn = None
+        try:
+            conn = open_connection()
+            return pd.read_sql(query, conn)
+        except Exception as e:
+            print(f"[litroph] database query failed (attempt {attempt}/{attempts}): "
+                  f"{type(e).__name__}: {e}", file=sys.stderr, flush=True)
+            if attempt == attempts:
+                raise
+            time.sleep(3)
+        finally:
+            if conn is not None:
+                conn.close()
 
 @st.cache_data(ttl=3600)
 def get_latest_prices():
@@ -711,6 +724,7 @@ try:
     data_ok = True
     latest_week = df_prices["week_date"].iloc[0].strftime("%b %d, %Y") if not df_prices.empty else "—"
 except Exception as e:
+    print(f"[litroph] could not load price data: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
     data_ok = False
     latest_week = "—"
     df_prices = pd.DataFrame()
@@ -975,7 +989,7 @@ if data_ok and not df_prices.empty:
         m2.metric("Most expensive", priciest["brand"], f"₱{priciest['price_php']:.2f}/L")
         m3.metric("Price spread", f"₱{spread:.2f}/L", f"{len(df_chart2)} brands tracked")
 else:
-    st.info("Waiting for price data. Run the Lambda ingestion function first.")
+    st.info("Price data is temporarily unavailable. Please refresh the page in a minute.")
 
 
 # ============================================================
